@@ -16,7 +16,8 @@ Install
    .. code-block:: shell
 
       npm install --save-dev @lingui/cli @babel/core
-      # yarn add --dev @lingui/cli @babel/core
+      # Or yarn
+      yarn add --dev @lingui/cli @babel/core
 
 2. Add following scripts to your ``package.json``:
 
@@ -43,7 +44,7 @@ Commands
 ``extract``
 -----------
 
-.. lingui-cli:: extract [--clean] [--overwrite] [--format <format>] [--locale <locale>] [--convert-from <format>] [--verbose]
+.. lingui-cli:: extract [files...] [--clean] [--overwrite] [--format <format>] [--locale <locale>] [--convert-from <format>] [--verbose] [--watch [--debounce <delay>]]
 
 This command extracts messages from source files and creates a message catalog for
 each language using the following steps:
@@ -51,6 +52,29 @@ each language using the following steps:
 1. Extract messages from all ``*.jsx?`` files inside :conf:`srcPathDirs`
 2. Merge them with existing catalogs in :conf:`localeDir` (if any)
 3. Write updated message catalogs to :conf:`localeDir`
+
+.. lingui-cli-option:: [files...]
+
+Filters source paths to only extract messages from passed files.
+For ex:
+
+   .. code-block:: shell
+
+      lingui extract src/components
+
+Will extract only messages from ``src/components/**/*`` files, you can also pass multiple paths.
+
+It's useful if you want to run extract command on files that are staged, using for example ``husky``, before commiting will extract messages from staged files:
+
+   .. code-block:: json
+
+      {
+         "husky": {
+            "hooks": {
+               "pre-commit": "lingui extract $(git diff --name-only --staged)"
+            }
+         }
+      }
 
 .. lingui-cli-option:: --clean
 
@@ -77,6 +101,19 @@ Convert message catalogs from previous format (see :conf:`format` option).
 
 Prints additional information.
 
+.. lingui-cli-option:: --watch
+
+Watch mode.
+
+Watches only for changes in files in paths defined in config file or in the command itself.
+
+Remember to use this only in development as this command do not cleans obsolete translations.
+
+.. lingui-cli-option:: --debounce <delay>
+
+Debounce, when used with ``--debounce <delay>``, delays extraction for ``<delay>`` milliseconds,
+bundling multiple file changes together.
+
 ``extract-template``
 --------------------
 
@@ -91,7 +128,7 @@ Prints additional information.
 ``compile``
 -----------
 
-.. lingui-cli:: compile [--strict] [--format <format>] [--verbose] [--namespace <namespace>]
+.. lingui-cli:: compile [--strict] [--format <format>] [--verbose] [--namespace <namespace>] [--watch [--debounce <delay>]]
 
 This command compiles message catalogs in :conf:`localeDir` and outputs
 minified Javascript files. Each message is replaced with a function
@@ -115,3 +152,19 @@ Prints additional information.
 
 Specify namespace for compiled message catalogs (also see :conf:`compileNamespace` for
 global configuration).
+
+.. lingui-cli-option:: --typescript
+
+Is the same as using :conf:`compileNamespace` with the value "ts".
+Generates a {compiledFile}.d.ts and the compiled file is generated using the extension .ts
+
+.. lingui-cli-option:: --watch
+
+Watch mode.
+
+Watches only for changes in locale files in your defined locale catalogs. For ex. ``locales\en\messages.po``
+
+.. lingui-cli-option:: --debounce <delay>
+
+Debounce, when used with ``--debounce <delay>``, delays compilation for ``<delay>`` milliseconds,
+to avoid compiling multiple times for subsequent file changes.

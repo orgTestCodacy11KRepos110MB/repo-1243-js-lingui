@@ -53,7 +53,7 @@ We're going to translate the following app:
          <Text>
            {messagesCount === 1
              ? `There's {messagesCount} message in your inbox.`
-             : `There're ${messagesCount} messages in your inbox.`}
+             : `There are ${messagesCount} messages in your inbox.`}
          </Text>
        </View>
 
@@ -69,6 +69,17 @@ Introducing internationalization
 ================================
 
 Not surprisingly, this part isn't too different from the :ref:`React tutorial <react-tutorial-label>`.
+
+⚠️ make sure to update ``metro.config.js`` resolvers with ``mjs`` extension to avoid `this problem <https://github.com/eemeli/make-plural/issues/15>`_:
+
+.. code-block:: jsx
+
+  resolver: {
+   sourceExts: ['js', 'ts', 'tsx', 'mjs'],
+  },
+
+
+
 
 Let's use the :jsxmacro:`Trans` macro first. Don't forget that we need to wrap our root
 component with the :component:`I18nProvider` so we can set the active language

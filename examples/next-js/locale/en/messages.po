@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "POT-Creation-Date: 2020-04-04 13:38+0200\n"
-"Mime-Version: 1.0\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
@@ -55,5 +55,5 @@ msgstr "Welcome to <0>LinguiJS!</0>"
 
 #: pages/examples.tsx:15
 #: pages/examples.tsx:19
-msgid "{value, plural, one {There's one book} other {There're # books}}"
-msgstr "{value, plural, one {There's one book} other {There're # books}}"
+msgid "{value, plural, one {There's one book} other {There are # books}}"
+msgstr "{value, plural, one {There's one book} other {There are # books}}"

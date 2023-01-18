@@ -45,10 +45,13 @@ const csv: CatalogFormatter = {
     try {
       return deserialize(raw)
     } catch (e) {
-      console.error(`Cannot read ${filename}: ${e.message}`)
-      return null
+      throw new Error(`Cannot read ${filename}: ${e.message}`)
     }
   },
+
+  parse(content) {
+    return deserialize(content)
+  }
 }
 
 export default csv

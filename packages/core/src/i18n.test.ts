@@ -72,6 +72,29 @@ describe("I18n", function () {
       expect(cbChange).toBeCalled()
     })
 
+    it("should activate instantly", () => {
+      const i18n = setupI18n({
+        locales: ["en", "es"],
+        messages: {
+          en: {
+            Hello: "Hello",
+          },
+          es: {
+            Hello: "Hola",
+          },
+        },
+        localeData: {
+          en: {},
+          es: {},
+        },
+      })
+
+      i18n.activate("en")
+      expect(i18n._("Hello")).toEqual("Hello")
+      i18n.activate("es")
+      expect(i18n._("Hello")).toEqual("Hola")
+    })
+
     it("should switch active locale", () => {
       const messages = {
         Hello: "Salut",
@@ -196,6 +219,24 @@ describe("I18n", function () {
     })
   })
 
+  it("._ should emit missing event for missing translation", () => {
+    const i18n = setupI18n({
+      locale: "en",
+      messages: { en: { exists: "exists" } },
+    })
+
+    const handler = jest.fn()
+    i18n.on("missing", handler)
+    i18n._("exists")
+    expect(handler).toHaveBeenCalledTimes(0)
+    i18n._("missing")
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(handler).toHaveBeenCalledWith({
+      id: "missing",
+      locale: "en",
+    })
+  })
+
   describe("params.missing - handling missing translations", function () {
     it("._ should return custom string for missing translations", function () {
       const i18n = setupI18n({
@@ -214,7 +255,7 @@ describe("I18n", function () {
         missing,
       })
       expect(i18n._("missing")).toEqual("gnissim")
-      expect(missing).toHaveBeenCalledWith("en", "missing")
+      expect(missing).toHaveBeenCalledWith("en", "missing", undefined)
     })
   })
 })

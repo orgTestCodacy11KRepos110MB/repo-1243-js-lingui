@@ -47,7 +47,7 @@ The message catalog will look like this:
    {
      "Message Inbox": "",
      "See all <0>unread messages</0> or <1>mark them</1> as read.": "",
-     "{messagesCount, plural, one {There's {messagesCount} message in your inbox.} other {There're {messagesCount} messages in your inbox.}}": "",
+     "{messagesCount, plural, one {There's {messagesCount} message in your inbox.} other {There are {messagesCount} messages in your inbox.}}": "",
      "Last login on {lastLogin,date}.": "",
    }
 
@@ -62,7 +62,7 @@ This catalog is ready for translation. Let's translate it into Czech by filling 
    {
      "Message Inbox": "Přijaté zprávy",
      "See all <0>unread messages</0> or <1>mark them</1> as read.": "Zobrazit všechny <0>nepřečtené zprávy</0> nebo je <1>označit</1> jako přečtené.",
-     "{messagesCount, plural, one {There's {messagesCount} message in your inbox.} other {There're {messagesCount} messages in your inbox.}}": "{messagesCount, plural, one {V příchozí poště je {messagesCount} zpráva.} few {V příchozí poště jsou {messagesCount} zprávy. } other {V příchozí poště je {messagesCount} zpráv.}}",
+     "{messagesCount, plural, one {There's {messagesCount} message in your inbox.} other {There are {messagesCount} messages in your inbox.}}": "{messagesCount, plural, one {V příchozí poště je {messagesCount} zpráva.} few {V příchozí poště jsou {messagesCount} zprávy. } other {V příchozí poště je {messagesCount} zpráv.}}",
      "Last login on {lastLogin,date}.": "Poslední přihlášení {lastLogin,date}",
    }
 
@@ -189,7 +189,7 @@ The ``locale/_build`` folder and ``locale/*/*.js`` (compiled catalogs) are safe 
 What you do need to keep in VCS are the json files (``locale/*/*.json``) that contain the messages
 for translators. The JavaScript functions that return the actual translations when your app runs in
 production are created from those json files. See
-`Excluding build files <../guides/excluding-build-files>`_ guide for more info.
+:doc:`Excluding build files <../guides/excluding-build-files>` guide for more info.
 
 If you're using a CI, it is a good idea to add the ``yarn extract`` and ``yarn compile``
 commands to your build process.
@@ -197,6 +197,6 @@ commands to your build process.
 Further reading
 ===============
 
-That's it! Checkout `CLI reference <../ref/cli>`_ documentation for more
-info about ``lingui`` commands or `configuration reference <../ref/conf>`_
+That's it! Checkout :doc:`CLI reference <../ref/cli>` documentation for more
+info about ``lingui`` commands or :doc:`configuration reference <../ref/conf>`
 for info about configuration parameters.

@@ -1,18 +1,17 @@
 import fs from "fs"
 import path from "path"
 import chalk from "chalk"
-import ora from "ora"
 import * as R from "ramda"
 
 import { prettyOrigin } from "./utils"
 
-import * as extractors from "./extractors"
-import { ExtractorType } from "./extractors"
-
+import cliExtractor, { ExtractorType } from "./extractors"
 
 type ExtractOptions = {
   ignore?: Array<string>
   verbose?: boolean
+  configPath?: string
+  extractors?: ExtractorType[]
   projectType?: string
   babelOptions?: Object
 }
@@ -39,20 +38,20 @@ function mergeMessage(msgId, prev, next) {
   }
 }
 
-export function extract(
+export async function extract(
   srcPaths: Array<string>,
   targetPath: string,
   options: ExtractOptions = {}
 ) {
-  const { ignore = [], verbose = false } = options
+  const { ignore = [] } = options
   const ignorePattern = ignore.length ? new RegExp(ignore.join("|"), "i") : null
 
-  srcPaths.forEach((srcFilename) => {
+  for (let srcFilename of srcPaths) {
     if (
       !fs.existsSync(srcFilename) ||
       (ignorePattern && ignorePattern.test(srcFilename))
     )
-      return
+      continue
 
     if (fs.statSync(srcFilename).isDirectory()) {
       const subdirs = fs
@@ -60,22 +59,12 @@ export function extract(
         .sort()
         .map((filename) => path.join(srcFilename, filename))
 
-      extract(subdirs, targetPath, options)
-      return
+      await extract(subdirs, targetPath, options)
+      continue
     }
 
-    R.values(extractors).some((ext: ExtractorType) => {
-      if (!ext.match || !ext.match(srcFilename)) return false
-
-      let spinner
-      if (verbose) spinner = ora().start(srcFilename)
-
-      ext.extract(srcFilename, targetPath, options)
-      if (verbose && spinner) spinner.succeed()
-
-      return true
-    })
-  })
+    await cliExtractor(srcFilename, targetPath, options)
+  }
 }
 
 export function collect(buildDir: string) {

@@ -1,4 +1,5 @@
 import chalk from "chalk"
+import chokidar from "chokidar"
 import program from "commander"
 
 import { getConfig, LinguiConfig } from "@lingui/conf"
@@ -7,19 +8,24 @@ import { AllCatalogsType, getCatalogs } from "./api/catalog"
 import { printStats } from "./api/stats"
 import { detect } from "./api/detect"
 import { helpRun } from "./api/help"
+import { ExtractorType } from "./api/extractors"
 
 export type CliExtractOptions = {
   verbose: boolean
+  files?: string[]
   clean: boolean
+  extractors?: ExtractorType[]
+  configPath: string
   overwrite: boolean
   locale: string
   prevFormat: string | null
+  watch?: boolean
 }
 
-export default function command(
+export default async function command(
   config: LinguiConfig,
   options: Partial<CliExtractOptions>
-): boolean {
+): Promise<boolean> {
   // `react-app` babel plugin used by CRA requires either BABEL_ENV or NODE_ENV to be
   // set. We're setting it here, because lingui macros are going to use them as well.
   if (!process.env.BABEL_ENV && !process.env.NODE_ENV) {
@@ -32,17 +38,21 @@ export default function command(
   process.env.LINGUI_EXTRACT = "1"
 
   options.verbose && console.error("Extracting messages from source files…")
+
   const catalogs = getCatalogs(config)
-  const catalogStats: { [path: string]: AllCatalogsType }  = {}
-  catalogs.forEach((catalog) => {
-    catalog.make({
-      ...options,
+  const catalogStats: { [path: string]: AllCatalogsType } = {}
+  let commandSuccess = true
+  for (let catalog of catalogs) {
+    const catalogSuccess = await catalog.make({
+      ...options as CliExtractOptions,
       orderBy: config.orderBy,
+      extractors: config.extractors,
       projectType: detect(),
     })
 
     catalogStats[catalog.path] = catalog.readAll()
-  })
+    commandSuccess &&= catalogSuccess
+  }
 
   Object.entries(catalogStats).forEach(([key, value]) => {
     console.log(`Catalog statistics for ${key}: `)
@@ -50,17 +60,29 @@ export default function command(
     console.log()
   })
 
-  console.error(
-    `(use "${chalk.yellow(
-      helpRun("extract")
-    )}" to update catalogs with new messages)`
-  )
-  console.error(
-    `(use "${chalk.yellow(
-      helpRun("compile")
-    )}" to compile catalogs for production)`
-  )
-  return true
+  if (!options.watch) {
+    console.error(
+      `(use "${chalk.yellow(
+        helpRun("extract")
+      )}" to update catalogs with new messages)`
+    )
+    console.error(
+      `(use "${chalk.yellow(
+        helpRun("compile")
+      )}" to compile catalogs for production)`
+    )
+  }
+
+  // If service key is present in configuration, synchronize with cloud translation platform
+  if (typeof config.service === 'object' && config.service.name && config.service.name.length) {
+    const moduleName = config.service.name.charAt(0).toLowerCase() + config.service.name.slice(1);
+
+    import(`./services/${moduleName}`)
+      .then(module => module.default(config, options))
+      .catch(err => console.error(`Can't load service module ${moduleName}`, err))
+  }
+
+  return commandSuccess
 }
 
 if (require.main === module) {
@@ -69,11 +91,16 @@ if (require.main === module) {
     .option("--locale <locale>", "Only extract the specified locale")
     .option("--overwrite", "Overwrite translations for source locale")
     .option("--clean", "Remove obsolete translations")
+    .option(
+      "--debounce <delay>",
+      "Debounces extraction for given amount of milliseconds"
+    )
     .option("--verbose", "Verbose output")
     .option(
       "--convert-from <format>",
       "Convert from previous format of message catalogs"
     )
+    .option("--watch", "Enables Watch Mode")
     // Obsolete options
     .option(
       "--babelOptions",
@@ -82,7 +109,9 @@ if (require.main === module) {
     .option("--format <format>", "Format of message catalogs")
     .parse(process.argv)
 
-  const config = getConfig({ configPath: program.config })
+  const config = getConfig({
+    configPath: program.config || process.env.LINGUI_CONFIG,
+  })
 
   let hasErrors = false
   if (program.format) {
@@ -125,13 +154,72 @@ if (require.main === module) {
 
   if (hasErrors) process.exit(1)
 
-  const result = command(config, {
-    verbose: program.verbose || false,
-    clean: program.clean || false,
-    overwrite: program.overwrite || false,
-    locale: program.locale,
-    prevFormat,
-  })
+  const extract = (filePath?: string[]) => {
+    return command(config, {
+      verbose: program.watch || program.verbose || false,
+      clean: program.watch ? false : program.clean || false,
+      overwrite: program.watch || program.overwrite || false,
+      locale: program.locale,
+      configPath: program.config || process.env.LINGUI_CONFIG,
+      watch: program.watch || false,
+      files: filePath?.length ? filePath : undefined,
+      prevFormat,
+    })
+  }
 
-  if (!result) process.exit(1)
+  const changedPaths = new Set<string>()
+  let debounceTimer: NodeJS.Timer
+  const dispatchExtract = (filePath?: string[]) => {
+    // Skip debouncing if not enabled
+    if (!program.debounce) return extract(filePath)
+
+    filePath?.forEach((path) => changedPaths.add(path))
+
+    // CLear the previous timer if there is any, and schedule the next
+    debounceTimer && clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(async () => {
+      const filePath = [...changedPaths]
+      changedPaths.clear()
+
+      await extract(filePath)
+    }, program.debounce)
+  }
+
+  // Check if Watch Mode is enabled
+  if (program.watch) {
+    console.info(chalk.bold("Initializing Watch Mode..."))
+
+    const catalogs = getCatalogs(config)
+    let paths = []
+    let ignored = []
+
+    catalogs.forEach((catalog) => {
+      paths.push(...catalog.include)
+      ignored.push(...catalog.exclude)
+    })
+
+    const watcher = chokidar.watch(paths, {
+      ignored: ["/(^|[/\\])../", ...ignored],
+      persistent: true,
+    })
+
+    const onReady = () => {
+      console.info(chalk.green.bold("Watcher is ready!"))
+      watcher
+        .on("add", (path) => dispatchExtract([path]))
+        .on("change", (path) => dispatchExtract([path]))
+    }
+
+    watcher.on("ready", () => onReady())
+  } else if (program.args) {
+    // this behaviour occurs when we extract files by his name
+    // for ex: lingui extract src/app, this will extract only files included in src/app
+    extract(program.args).then(result => {
+      if (!result) process.exit(1)
+    })
+  } else {
+    extract().then(result => {
+      if (!result) process.exit(1)
+    })
+  }
 }

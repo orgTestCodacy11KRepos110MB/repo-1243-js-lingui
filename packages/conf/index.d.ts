@@ -1,6 +1,9 @@
-export declare type CatalogFormat = "lingui" | "minimal" | "po" | "csv";
+import type { GeneratorOptions } from "@babel/core";
+
+export declare type CatalogFormat = "lingui" | "minimal" | "po" | "csv" | "po-gettext";
 export type CatalogFormatOptions = {
     origins?: boolean;
+    lineNumbers?: boolean;
 }
 export declare type OrderBy = "messageId" | "origin";
 declare type CatalogConfig = {
@@ -20,22 +23,38 @@ export type DefaultLocaleObject = {
 
 export declare type FallbackLocales = LocaleObject | DefaultLocaleObject
 
+declare type CatalogService = {
+    name: string;
+    apiKey: string;
+}
+
+declare type ExtractorType = {
+    match(filename: string): boolean;
+    extract(filename: string, targetDir: string, options?: any): void;
+}
+
 export declare type LinguiConfig = {
     catalogs: CatalogConfig[];
-    compileNamespace: string;
-    extractBabelOptions: Object;
+    compileNamespace: "es" | "cjs" | "ts" | string;
+    extractBabelOptions: Record<string, unknown>;
+    compilerBabelOptions: GeneratorOptions;
     fallbackLocales: FallbackLocales;
     format: CatalogFormat;
+    extractors?: ExtractorType[];
     prevFormat: CatalogFormat;
     formatOptions: CatalogFormatOptions;
     localeDir: string;
     locales: string[];
-    catalogsMergePath?: string;
+    catalogsMergePath: string;
     orderBy: OrderBy;
     pseudoLocale: string;
     rootDir: string;
-    runtimeConfigModule: [string, string?];
+    runtimeConfigModule: [source: string, identifier?: string] | {
+        i18n?: [source: string, identifier?: string]
+        Trans?: [source: string, identifier?: string]
+    };
     sourceLocale: string;
+    service: CatalogService;
 };
 export declare const defaultConfig: LinguiConfig;
 export declare function getConfig({ cwd, configPath, skipValidation, }?: {
@@ -51,8 +70,9 @@ export declare const configValidation: {
             plugins: string[];
             presets: string[];
         };
+        compilerBabelOptions: GeneratorOptions;
         catalogs: CatalogConfig[];
-        compileNamespace: string;
+        compileNamespace: "es" | "ts" | "cjs" | string;
         fallbackLocales: FallbackLocales;
         format: CatalogFormat;
         formatOptions: CatalogFormatOptions;
@@ -60,8 +80,9 @@ export declare const configValidation: {
         orderBy: OrderBy;
         pseudoLocale: string;
         rootDir: string;
-        runtimeConfigModule: [string, string?];
+        runtimeConfigModule: LinguiConfig['runtimeConfigModule'];
         sourceLocale: string;
+        service: CatalogService;
     };
     deprecatedConfig: {
         fallbackLocale: (config: LinguiConfig & DeprecatedFallbackLanguage) => string;

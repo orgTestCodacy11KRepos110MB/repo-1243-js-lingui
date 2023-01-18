@@ -1,28 +1,32 @@
-import { interpolate } from "./context"
+import { interpolate, UNICODE_REGEX } from "./context"
 import { isString, isFunction } from "./essentials"
 import { date, number } from "./formats"
-import * as icu from "./dev"
+import { compileMessage } from "@lingui/core/compile"
 import { EventEmitter } from "./eventEmitter"
+import type {PluralCategory} from "make-plural"
 
 export type MessageOptions = {
   message?: string
-  formats?: Object
+  context?: string
+  formats?: Formats
 }
 
 export type Locale = string
 export type Locales = Locale | Locale[]
+export type Formats = Record<string, Intl.DateTimeFormatOptions | Intl.NumberFormatOptions>
+
+export type Values = Record<string, unknown>;
 
 export type LocaleData = {
-  plurals?: Function
+  plurals?: (n: number, ordinal?: boolean) => PluralCategory
 }
 
 export type AllLocaleData = Record<Locale, LocaleData>
 
-export type CompiledMessage =
-  | string
-  | Array<
-      string | Array<string | (string | undefined) | Record<string, unknown>>
-    >
+export type CompiledIcuChoices = Record<string, CompiledMessage> & {offset: number};
+export type CompiledMessageToken = string | [name: string, type?: string, format?: null | string | CompiledIcuChoices];
+
+export type CompiledMessage = string | CompiledMessageToken[]
 
 export type Messages = Record<string, CompiledMessage>
 
@@ -32,7 +36,14 @@ export type MessageDescriptor = {
   id?: string
   comment?: string
   message?: string
+  context?: string
   values?: Record<string, unknown>
+}
+
+export type MissingMessageEvent = {
+  locale: Locale
+  id: string
+  context?: string
 }
 
 type setupI18nProps = {
@@ -40,19 +51,20 @@ type setupI18nProps = {
   locales?: Locales
   messages?: AllMessages
   localeData?: AllLocaleData
-  missing?: string | ((message, id) => string)
+  missing?: string | ((message: string, id: string, context: string) => string)
 }
 
 type Events = {
   change: () => void
+  missing: (event: MissingMessageEvent) => void
 }
 
 export class I18n extends EventEmitter<Events> {
-  _locale: Locale
-  _locales: Locales
-  _localeData: AllLocaleData
-  _messages: AllMessages
-  _missing: string | ((message, id) => string)
+  private _locale: Locale
+  private _locales: Locales
+  private _localeData: AllLocaleData
+  private _messages: AllMessages
+  private _missing: string | ((message, id, context) => string)
 
   constructor(params: setupI18nProps) {
     super()
@@ -84,7 +96,7 @@ export class I18n extends EventEmitter<Events> {
     return this._localeData[this._locale] ?? {}
   }
 
-  _loadLocaleData(locale: Locale, localeData: LocaleData) {
+  private _loadLocaleData(locale: Locale, localeData: LocaleData) {
     if (this._localeData[locale] == null) {
       this._localeData[locale] = localeData
     } else {
@@ -111,7 +123,7 @@ export class I18n extends EventEmitter<Events> {
     this.emit("change")
   }
 
-  _load(locale: Locale, messages: Messages) {
+  private _load(locale: Locale, messages: Messages) {
     if (this._messages[locale] == null) {
       this._messages[locale] = messages
     } else {
@@ -159,44 +171,64 @@ export class I18n extends EventEmitter<Events> {
   // method for translation and formatting
   _(
     id: MessageDescriptor | string,
-    values: Object | undefined = {},
-    { message, formats }: MessageOptions | undefined = {}
+    values: Values | undefined = {},
+    { message, formats, context }: MessageOptions | undefined = {}
   ) {
     if (!isString(id)) {
       values = id.values || values
       message = id.message
+      context = id.context
       id = id.id
     }
-    let translation = this.messages[id] || message || id
+
+    const messageMissing = !context && !this.messages[id]
+    const contextualMessageMissing = context && !this.messages[context][id]
+    const messageUnreachable = contextualMessageMissing || messageMissing
 
     // replace missing messages with custom message for debugging
     const missing = this._missing
-    if (missing && !this.messages[id]) {
-      return isFunction(missing) ? missing(this.locale, id) : missing
+    if (missing && messageUnreachable) {
+      return isFunction(missing) ? missing(this._locale, id, context) : missing
+    }
+
+    if (messageUnreachable) {
+      this.emit("missing", { id, context, locale: this._locale })
+    }
+
+    let translation
+
+    if (context && !contextualMessageMissing) {
+      // context is like a subdirectory of other keys
+      translation = this.messages[context][id] || message || id
+    } else {
+      translation = this.messages[id] || message || id
     }
 
     if (process.env.NODE_ENV !== "production") {
       translation = isString(translation)
-        ? icu.compile(translation)
+        ? compileMessage(translation)
         : translation
     }
 
+    // hack for parsing unicode values inside a string to get parsed in react native environments
+    if (isString(translation) && UNICODE_REGEX.test(translation))
+      return JSON.parse(`"${translation}"`) as string
     if (isString(translation)) return translation
 
     return interpolate(
       translation,
-      this.locale,
-      this.locales,
+      this._locale,
+      this._locales,
       this.localeData
     )(values, formats)
   }
 
   date(value: string | Date, format?: Intl.DateTimeFormatOptions): string {
-    return date(this.locales || this.locale, format)(value)
+    return date(this._locales || this._locale, format)(value)
   }
 
   number(value: number, format?: Intl.NumberFormatOptions): string {
-    return number(this.locales || this.locale, format)(value)
+    return number(this._locales || this._locale, format)(value)
   }
 }
 

@@ -67,7 +67,7 @@ rendered with the ``translation`` passed in as its child:
    <Trans component={Text}>Link to docs</Trans>;
    // renders as <Text>Link to docs</Text>
 
-To get more control over the rendering of translation, use instead the ``render`` method with 
+To get more control over the rendering of translation, use instead the ``render`` method with
 **React.Component** (or stateless component). Component passed to
 ``render`` will receive the translation value as a ``translation`` prop:
 
@@ -133,11 +133,27 @@ are arguments and components used for formatting translation:
      components={[<Link to="/docs" />]}
    />;
 
+Plurals
+^^^^^^^
+
+If you cannot use `@lingui/macro` for some reason(maybe you compile your code using just TS instead of babel), you can render plurals using the plain Trans component like this:
+
+.. code-block:: jsx
+
+   import React from 'react';
+   import { Trans } from '@lingui/react';
+
+   <Trans
+      id="{count, plural, =1 {car} other {cars}}"
+      values={{ count: cars.length }}
+   ></Trans>
+
+
 Providers
 =========
 
 Message catalogs and the active locale are passed to the context in
-:component:`I18nProvider`. Use `:js:func:`useLingui` hook or :js:func:`withI18n`
+:component:`I18nProvider`. Use :js:func:`useLingui` hook or :js:func:`withI18n`
 high-order component to access Lingui context.
 
 I18nProvider
@@ -154,6 +170,32 @@ I18nProvider
 ``defaultComponent`` has the same meaning as ``component`` in other i18n
 components. :ref:`Rendering of translations <rendering-translations>` is explained
 at the beginning of this document.
+
+.. code-block:: jsx
+
+   import React from 'react';
+   import { I18nProvider } from '@lingui/react';
+   import { i18n } from '@lingui/core';
+   import { messages as messagesEn } from './locales/en/messages.js';
+
+   i18n.load({
+      en: messagesEn,
+   });
+   i18n.activate('en');
+
+   const DefaultI18n = ({ isTranslated, children }) => (
+      <span style={{ color: isTranslated ? undefined : 'red' }}>
+         {children}
+      </span>
+   )
+
+   const App = () => {
+      return (
+         <I18nProvider i18n={i18n} defaultComponent={DefaultI18n}>
+            // rest of the app
+         </I18nProvider>
+      );
+   }
 
 ``forceRenderOnLocaleChange`` is true by default and it ensures that:
 
@@ -173,7 +215,7 @@ top-level application component. However, if the ``locale`` is stored in a
    import React from 'react';
    import { I18nProvider } from '@lingui/react';
    import { i18n } from '@lingui/core';
-   import { messages as messagesEn } from './locales/en/messages.js';
+   import { messages as messagesEn } from './locales/en/messages.js';
 
    i18n.load({
       en: messagesEn,
@@ -201,7 +243,7 @@ useLingui
    const CurrentLocale = () => {
       const { i18n } = useLingui()
 
-      return <span>Current locale: {i18n.locale}
+      return <span>Current locale: {i18n.locale}</span>
    }
 
 withI18n
@@ -218,7 +260,7 @@ wrapped component. ``i18n`` object is needed when you have to access the i18n da
    import { withI18n } from "@lingui/react"
 
    const CurrentLocale = withI18n()(({ i18n }) => (
-      <span>Current locale: {i18n.locale}
+      <span>Current locale: {i18n.locale}</span>
    ))
 
 .. _Intl.DateTimeFormat: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat

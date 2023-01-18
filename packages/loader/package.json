@@ -1,8 +1,9 @@
 {
   "name": "@lingui/loader",
-  "version": "3.2.3",
+  "version": "3.16.0",
   "description": "webpack loader for lingui message catalogs",
-  "main": "index.js",
+  "types": "./build/index.d.ts",
+  "main": "./build/index.js",
   "author": {
     "name": "Tomáš Ehrlich",
     "email": "tomas.ehrlich@gmail.com"
@@ -26,19 +27,24 @@
     "url": "https://github.com/lingui/js-lingui/issues"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=14.0.0"
   },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "build/"
+  ],
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "@lingui/cli": "^3.2.3",
-    "@lingui/conf": "^3.2.3",
-    "loader-utils": "^2.0.0",
-    "ramda": "^0.27.1"
+    "@lingui/cli": "3.16.0",
+    "@lingui/conf": "3.16.0",
+    "loader-utils": "^2.0.0"
   },
   "devDependencies": {
-    "memory-fs": "^0.5.0"
+    "memory-fs": "^0.5.0",
+    "webpack": "^4.44.2"
   },
   "peerDependencies": {
-    "webpack": "^4.0.0"
+    "webpack": "^4.0.0 || ^5.0.0"
   }
 }

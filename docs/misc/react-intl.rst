@@ -4,7 +4,7 @@ Comparison with react-intl
 
 `react-intl`_ is definitely the most popular and widely-used i18n library for React.
 `LinguiJS`_ is in many ways very similar: both libraries use the same syntax for
-(messages ICU MessageFormat) and they also have very similar API.
+messages (ICU MessageFormat) and they also have very similar API.
 
 Here's an example from `react-intl`_ docs:
 
@@ -42,7 +42,7 @@ Suppose we have the following text:
 
 .. code-block:: html
 
-   <p>Read the <a href="/docs>documentation</a>.</p>
+   <p>Read the <a href="/docs">documentation</a>.</p>
 
 In `react-intl`_, this would be translated as:
 
@@ -83,7 +83,7 @@ Let's go back to the previous example:
 .. code-block:: html
 
    <p>
-      Read the <a href="/docs>documentation</a>.
+      Read the <a href="/docs">documentation</a>.
    </p>
 
 All we need to do is to wrap the message in a :jsxmacro:`Trans` macro:
@@ -91,7 +91,7 @@ All we need to do is to wrap the message in a :jsxmacro:`Trans` macro:
 .. code-block:: html
 
    <p>
-      <Trans id="msg.docs">Read the <a href="/docs>documentation</a>.</Trans>
+      <Trans id="msg.docs">Read the <a href="/docs">documentation</a>.</Trans>
    </p>
 
 The macro then parses the :jsxmacro:`Trans` macro children and generates
@@ -123,10 +123,10 @@ Let's compare it with `react-intl`_ solution to see the difference:
    .. code-block:: html
 
       <p>
-         <Trans>Read the <a href="/docs>documentation</a>.</Trans>
+         <Trans>Read the <a href="/docs">documentation</a>.</Trans>
       </p>
 
-   The message ID is ``Read the <0>documentation</0>.`` instead of ``msg.id``. Both
+   The message ID is ``Read the <0>documentation</0>.`` instead of ``msg.docs``. Both
    solutions have pros and cons and the library lets you choose the one which works best for you.
 
 Plurals
@@ -230,7 +230,7 @@ to the translator.
 `react-intl`_ comes with the Babel plugin which extracts messages from individual files,
 but it's up to you to merge them into one file which you can send to translators.
 
-`LinguiJS`_ provides handy `CLI <../tutorials/cli>`_ which extracts messages and merges
+`LinguiJS`_ provides handy :doc:`CLI <../tutorials/cli>` which extracts messages and merges
 them with any existing translations. Again, the story doesn't end here.
 
 Compiling messages
@@ -283,7 +283,7 @@ Discussion
 ==========
 
 Do you have any comments or questions? Please join the discussion at
-`gitter <https://gitter.im/lingui/js-lingui>`_ or raise an
+`Discord <https://discord.gg/gFWwAYnMtA>`_ or raise an
 `issue <https://github.com/lingui/js-lingui/issues/new>`_. All feedback is welcome!
 
 .. _react-intl: https://github.com/yahoo/react-intl

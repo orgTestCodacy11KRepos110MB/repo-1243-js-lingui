@@ -7,6 +7,11 @@ Configuration is read from 3 different sources (the first found wins):
 - from ``lingui`` section in ``package.json``
 - from ``.linguirc``
 - from ``lingui.config.js``
+- from ``lingui.config.ts`` _(since 3.4.0)_
+
+You can also define environment variable ``LINGUI_CONFIG`` with path to your config file.
+
+In the case of TypeScript based config you can use ESM format and `export default`.
 
 Default config:
 
@@ -20,9 +25,11 @@ Default config:
     }],
     "compileNamespace": "cjs",
     "extractBabelOptions": {},
+    "compilerBabelOptions": {},
     "fallbackLocales": {},
     "format": "po",
     "locales": [],
+    "extractors": ["babel"],
     "orderBy": "messageId",
     "pseudoLocale": "",
     "rootDir": ".",
@@ -63,10 +70,10 @@ is replaced by value of :conf:`rootDir`.
 ``{name}`` token in ``path`` is replaced with a catalog name. Source path must
 include ``{name}`` pattern as well and it works as a ``*`` glob pattern:
 
-.. code-block:: json
+.. code-block:: js
 
    {
-      "catalogs": [{
+      catalogs: [{
          path: "./components/{name}/locale/{locale}",
          include: ["./components/{name}/"],
       }]
@@ -198,6 +205,21 @@ Use ES6 named export:
 
    /* eslint-disable */export const messages = {"..."}
 
+ts
+^^
+
+Use ES6 named export + .ts file with an additional {compiledFile}.d.ts file:
+
+.. code-block:: js
+
+   /* eslint-disable */export const messages = {"..."}
+
+.. code-block:: js
+
+   import { Messages } from '@lingui/core';
+   declare const messages: Messages;
+   export { messages };
+
 (window|global)\.(.*)
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -230,10 +252,44 @@ extracted. This is required when project doesn't use standard Babel config
      }
    }
 
+.. config:: compilerBabelOptions
+
+compilerBabelOptions
+--------------------
+
+Default:
+
+.. code-block:: json
+
+  {
+     "minified": true,
+     "jsescOption": {
+        "minimal": true
+     }
+  }
+
+
+Specify extra babel options used to generate files when messages are being
+compiled. We use internaly ``@babel/generator`` that accepts some configuration for generating code with/out ASCII characters.
+These are all the options available: https://github.com/mathiasbynens/jsesc
+
+.. code-block:: json
+
+   {
+     "compilerBabelOptions": {
+       "jsescOption": {
+         "minimal": false
+      }
+     }
+   }
+
+This example configuration will compile with scaped ASCII characters. https://github.com/mathiasbynens/jsesc#minimal
+
 .. config:: fallbackLocales
 
+
 fallbackLocales
---------------
+---------------
 
 Default: ``{}``
 
@@ -295,6 +351,11 @@ Gettext PO file:
    msgid "MessageID"
    msgstr "Translated Message"
 
+po-gettext
+^^^^^^^^^^
+
+Uses PO files but with gettext-style plurals, see :ref:`po-gettext`.
+
 minimal
 ^^^^^^^
 
@@ -329,12 +390,14 @@ Origin is filename and line number from where the message was extracted.
 Note that origins may produce a large amount of merge conflicts. Origins can be
 disabled by setting ``origins: false`` in :conf:`formatOptions`.
 
+Also, you can disable just ``lineNumbers`` but keep ``origins``
+
 .. config:: formatOptions
 
 formatOptions
 -------------
 
-Default: ``{ origins: true }``
+Default: ``{ origins: true, lineNumbers: true }``
 
 Object for configuring message catalog output. See individual formats for options.
 
@@ -346,8 +409,10 @@ locales
 Default: ``[]``
 
 Locale tags which are used in the project. :cli:`extract` and :cli:`compile`
-writes one catalog for each locale. Each locale must be a valid
-`BCP-47 code <http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html>`_.
+writes one catalog for each locale. Each locale should be a valid `BCP-47 code <http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html>`_ code. If you use a string that is not a BCP-47, make sure to use a BCP-47 when defining plurals in 18n.loadLocaleData. 
+
+For example for `pt-br`: ``i18n.loadLocaleData('pt-br', { plurals: pt })``
+
 
 orderBy
 -------
@@ -416,6 +481,20 @@ You may use a different named export:
 
 .. config:: sourceLocale
 
+In some advanced cases you may also need to change the module from which
+`Trans` is imported. To do that, pass an object to `runtimeConfigModule`:
+
+.. code-block:: jsx
+
+   // If you import `i18n` object from custom module like this:
+   import { Trans, i18n } from "./custom-config"
+
+   // ... then add following line to Lingui configuration:
+   // "runtimeConfigModule": {
+   //   i18n: ["./custom-config", "i18n"],
+   //   Trans: ["./custom-config", "Trans"]
+   // }
+
 sourceLocale
 ------------
 
@@ -429,3 +508,26 @@ providing custom translation.
 The difference between :conf:`fallbackLocales` and :conf:`sourceLocale` is that
 :conf:`fallbackLocales` is used in translation, while :conf:`sourceLocale` is
 used for the message ID.
+
+extractors
+------------
+
+Default: ``[babel]``
+
+Extractors it's the way to customize which extractor you want for your codebase, a long time ago Babel wasn't ready yet to work with Typescript,
+so we added two extractors as default ``[babel, typescript]``, but right now Babel already works good with Typescript so isn't a requirement anymore to compile two times the same code.
+
+Anyway, if you want to use the typescript extractor in conjuntion with babel you can do:
+
+.. code-block:: js
+
+   {
+      "extractors": [
+         require.resolve("@lingui/cli/api/extractors/babel"),
+         require.resolve("@lingui/cli/api/extractors/typescript"),
+      ]
+   }
+
+Of course you can build your own extractor, take a look to babel and typescript extractors to see how you should do it, but basically exports two methods:
+ - match: regex to a filename extension, should return true|false
+ - extract: is the responsible of transforming the code and using @lingui/babel-plugin-extract-messages

@@ -11,7 +11,7 @@
 [![PRs Welcome][Badge-PRWelcome]][PRWelcome]
 [![Backers on Open Collective][Badge-ocbackers]][ocbackers-local]
 [![Sponsors on Open Collective][Badge-ocsponsors]][ocsponsors-local]
-[![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)][Spectrum]
+[![Join the community on Discord][Badge-Discord]][Discord]
 
 [**Documentation**][Documentation] · [**Documentation 2.x**](https://js-lingui-git-stable-2x.lingui-js.vercel.app/) · [**Quickstart**](#quickstart) · [**Example**](#example) · [**Support**](#support) · [**Contribute**](#contribute) · [**Licence**](#licence)
 </div>
@@ -38,14 +38,14 @@ Lingui is an easy yet powerful internationalization framework for global project
   checks that all messages are translated before shipping to production.
 
 - **Unopinionated** - Integrate Lingui into your existing workflow. It supports
-  message keys as well as auto generated messages. Translations are stored either in
-  JSON or standard PO file, which is supported in almost all translation tools.
+  message keys as well as auto-generated messages. Translations are stored either in
+  JSON or standard PO files, which are supported in almost all translation tools.
 
 - **Lightweight and optimized** - Core library is only [1.9 kB gzipped][BundleCore],
-  React components are additional [3.1 kBs gzipped][BundleReact]. That's less than Redux
+  React components are an additional [3.1 kBs gzipped][BundleReact]. That's less than Redux
   for a full-featured intl library.
 
-- **Active community** - Join us on [Spectrum][Spectrum] to discuss the latest development.
+- **Active community** - Join us on [Discord][Discord] to discuss the latest development.
   At the moment, Lingui is the most active intl project on GitHub.
 
 - **Compatible with react-intl** - Low-level React API is very similar to react-intl
@@ -65,8 +65,8 @@ Lingui is an easy yet powerful internationalization framework for global project
 - [Plain JavaScript][TutorialJavaScript]
 - [Working with Command Line Tool][TutorialCLI]
 
-If you're a react-intl user, checkout
-[comparison of react-intl and Lingui](https://lingui.js.org/misc/react-intl.html).
+If you're a react-intl user, check out
+[a comparison of react-intl and Lingui](https://lingui.js.org/misc/react-intl.html).
 
 ## Example
 
@@ -98,19 +98,19 @@ For more example see the [React tutorial][TutorialReact].
 
 If you are having issues, please let us know.
 
-- Join us at [Gitter](https://gitter.im/lingui/js-lingui) to get almost instant feedback.
-- Ask question on [StackOverflow](https://stackoverflow.com/questions/ask?tags=jsLingui)
+- Join us on [Discord](https://discord.gg/gFWwAYnMtA) to chat with the community.
+- Ask questions on [StackOverflow](https://stackoverflow.com/questions/ask?tags=jsLingui)
   and mark it with [Lingui](https://stackoverflow.com/questions/tagged/jslingui) tag.
 - If something doesn't work as documented, documentation is missing or if you just want
   to suggest a new feature, [create an issue][Issues].
 
 ## Contribute
 
-Contribution to open-source project is everything from spreading a word, writing
-documentation to implementing features and fixing bugs.
+Contribution to open-source project is everything from spreading the word, writing
+documentation to implement features and fixing bugs.
 
 - Do you use **Lingui** in production site? Let us know!
-- Have you seen interesting talk or article about **i18n**?
+- Have you seen any interesting talk or article about **i18n**?
   [Share it](https://github.com/lingui/js-lingui/edit/main/docs/misc/talks-about-i18n.rst)!
 - Have you found a bug or do you want to suggest a new feature? [Create an issue][Issues]!
 - Do you want to improve the docs and write some code?
@@ -164,6 +164,7 @@ The project is licensed under the [MIT][License] license.
 [Badge-Coverage]: https://img.shields.io/codecov/c/github/lingui/js-lingui/main.svg
 [Badge-PRWelcome]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
 [Badge-ocbackers]: https://opencollective.com/js-lingui/backers/badge.svg
+[Badge-Discord]: https://img.shields.io/discord/974702239358783608.svg?label=Discord&logo=Discord&colorB=7289da&style=flat-square
 [Badge-ocsponsors]: https://opencollective.com/js-lingui/sponsors/badge.svg
 [Img-Contributors]: https://opencollective.com/js-lingui/contributors.svg?width=890&button=false
 [Contributors]: https://github.com/lingui/js-lingui/graphs/contributors
@@ -182,4 +183,4 @@ The project is licensed under the [MIT][License] license.
 [ocsponsors-local]: #sponsors
 [BundleReact]: https://bundlephobia.com/result?p=@lingui/react
 [BundleCore]: https://bundlephobia.com/result?p=@lingui/core
-[Spectrum]: https://spectrum.chat/linguijs
+[Discord]: https://discord.gg/gFWwAYnMtA

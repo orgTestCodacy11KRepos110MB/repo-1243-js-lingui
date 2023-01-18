@@ -16,3 +16,8 @@ Feel free to `send a PR <https://github.com/lingui/js-lingui/issues/new>`__ to l
 - `Symbolovník <http://www.symbolovnik.cz>`__
 - `Notos <https://www.notos.co>`__
 - `Greenlight <https://greenlightready.com>`__
+- `OkCupid <https://www.okcupid.com>`__
+- `mapflow.ai <https://mapflow.ai>`__
+- `Ascendero.com <https://ascendero.com/>`__
+- `InterMenu.com <https://intermenu.com>`__
+- `Fider <https://fider.io/>`__ (`source <https://github.com/getfider/fider>`__)

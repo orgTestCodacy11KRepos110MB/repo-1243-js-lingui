@@ -1,3 +1,4 @@
+import type { GeneratorOptions } from "@babel/core"
 import path from "path"
 import fs from "fs"
 import chalk from "chalk"
@@ -8,6 +9,8 @@ export type CatalogFormat = "lingui" | "minimal" | "po" | "csv"
 
 export type CatalogFormatOptions = {
   origins?: boolean
+  lineNumbers?: boolean
+  disableSelectWarning?: boolean
 }
 
 export type OrderBy = "messageId" | "origin"
@@ -27,20 +30,35 @@ type DefaultLocaleObject = {
 }
 export type FallbackLocales = LocaleObject | DefaultLocaleObject | false
 
+type ModuleSource = [string, string?]
+
+type CatalogService = {
+  name: string
+  apiKey: string
+}
+
+type ExtractorType = {
+  match(filename: string): boolean
+  extract(filename: string, targetDir: string, options?: any): void
+}
+
 export type LinguiConfig = {
   catalogs: CatalogConfig[]
-  compileNamespace: string
-  extractBabelOptions: Object
+  compileNamespace: "es" | "ts" | "cjs" | string
+  extractBabelOptions: Record<string, unknown>
+  compilerBabelOptions: GeneratorOptions
   fallbackLocales?: FallbackLocales
+  extractors?: ExtractorType[] | string[]
   format: CatalogFormat
   formatOptions: CatalogFormatOptions
   locales: string[]
-  catalogsMergePath?: string
+  catalogsMergePath: string
   orderBy: OrderBy
   pseudoLocale: string
   rootDir: string
-  runtimeConfigModule: [string, string?]
+  runtimeConfigModule: ModuleSource | { [symbolName: string]: ModuleSource }
   sourceLocale: string
+  service: CatalogService
 }
 
 // Enforce posix path delimiters internally
@@ -60,17 +78,25 @@ export const defaultConfig: LinguiConfig = {
       exclude: ["*/node_modules/*"],
     },
   ],
+  catalogsMergePath: "",
   compileNamespace: "cjs",
+  compilerBabelOptions: {
+    minified: true,
+    jsescOption: {
+      minimal: true,
+    }
+  },
   extractBabelOptions: { plugins: [], presets: [] },
   fallbackLocales: {},
   format: "po",
-  formatOptions: { origins: true },
+  formatOptions: { origins: true, lineNumbers: true },
   locales: [],
   orderBy: "messageId",
   pseudoLocale: "",
   rootDir: ".",
   runtimeConfigModule: ["@lingui/core", "i18n"],
   sourceLocale: "",
+  service: { name: "", apiKey: "" }
 }
 
 function configExists(path) {
@@ -87,7 +113,23 @@ export function getConfig({
   skipValidation?: boolean
 } = {}): LinguiConfig {
   const defaultRootDir = cwd || process.cwd()
-  const configExplorer = cosmiconfigSync("lingui")
+  const moduleName = "lingui"
+  const configExplorer = cosmiconfigSync(moduleName, {
+    searchPlaces: [
+      "package.json",
+      `.${moduleName}rc`,
+      `.${moduleName}rc.json`,
+      `.${moduleName}rc.yaml`,
+      `.${moduleName}rc.yml`,
+      `.${moduleName}rc.ts`,
+      `.${moduleName}rc.js`,
+      `${moduleName}.config.ts`,
+      `${moduleName}.config.js`,
+    ],
+    loaders: {
+      ".ts": TypeScriptLoader,
+    },
+  })
 
   const result = configExists(configPath)
     ? configExplorer.load(configPath)
@@ -120,6 +162,15 @@ export function getConfig({
 
 const exampleConfig = {
   ...defaultConfig,
+  extractors: multipleValidOptions(
+    [],
+    ["babel"],
+    [{
+      match: (fileName: string) => false,
+      extract: (filename: string, targetDir: string, options?: any) => {}
+    } as ExtractorType]
+  ),
+  runtimeConfigModule: multipleValidOptions({i18n: ["@lingui/core", "i18n"], Trans: ["@lingui/react", "Trans"]}, ["@lingui/core", "i18n"]),
   fallbackLocales: multipleValidOptions(
     {},
     { "en-US": "en" },
@@ -132,11 +183,15 @@ const exampleConfig = {
     rootMode: "rootmode",
     plugins: ["plugin"],
     presets: ["preset"],
+    targets: multipleValidOptions({}, '> 0.5%', ['> 0.5%', 'not dead'], undefined),
+    assumptions: multipleValidOptions({}, undefined),
+    browserslistConfigFile: multipleValidOptions(true, undefined),
+    browserslistEnv: multipleValidOptions('.browserslistrc', undefined),
   },
 }
 
 const deprecatedConfig = {
-    fallbackLocale: (config: LinguiConfig & DeprecatedFallbackLanguage) =>
+  fallbackLocale: (config: LinguiConfig & DeprecatedFallbackLanguage) =>
     ` Option ${chalk.bold("fallbackLocale")} was replaced by ${chalk.bold(
       "fallbackLocales"
     )}
@@ -146,9 +201,7 @@ const deprecatedConfig = {
     @lingui/cli now treats your current configuration as:
     {
       ${chalk.bold('"fallbackLocales"')}: {
-        default: ${chalk.bold(
-          `"${config.fallbackLocale}"`
-        )}
+        default: ${chalk.bold(`"${config.fallbackLocale}"`)}
       }
     }
 
@@ -246,7 +299,7 @@ export function replaceRootDir(
     } else if (typeof value === "string") {
       return replace(value)
     } else if (Array.isArray(value)) {
-      return value.map((item) => replaceDeep(item, rootDir)) as any
+      return (value as any).map((item) => replaceDeep(item, rootDir))
     } else if (typeof value === "object") {
       Object.keys(value).forEach((key) => {
         const newKey = replaceDeep(key, rootDir)
@@ -271,25 +324,28 @@ export function fallbackLanguageMigration(
 ): LinguiConfig {
   const { fallbackLocale, fallbackLocales } = config
 
-  if (fallbackLocales === false) return {
-    ...config,
-    fallbackLocales: null,
-  }
-
-  config.locales.forEach((locale) => {
-    const fl = getCldrParentLocale(locale.toLowerCase())
-    if (fl && !config.fallbackLocales[locale]) {
-      config.fallbackLocales = {
-        ...config.fallbackLocales,
-        [locale]: fl
-      }
+  if (fallbackLocales === false)
+    return {
+      ...config,
+      fallbackLocales: null,
     }
-  })
 
   const DEFAULT_FALLBACK = fallbackLocales?.default || fallbackLocale
   if (DEFAULT_FALLBACK) {
     if (!config.fallbackLocales) config.fallbackLocales = {}
     config.fallbackLocales.default = DEFAULT_FALLBACK
+  }
+
+  if (config.fallbackLocales !== false && !config.fallbackLocales.default) {
+    config.locales.forEach((locale) => {
+      const fl = getCldrParentLocale(locale.toLowerCase())
+      if (fl && !config.fallbackLocales[locale]) {
+        config.fallbackLocales = {
+          ...config.fallbackLocales,
+          [locale]: fl,
+        }
+      }
+    })
   }
 
   return config
@@ -470,7 +526,7 @@ function getCldrParentLocale(sourceLocale: string) {
     "yue-hans": "yue",
     "zh-hant": "zh",
     "zh-hant-hk": "zh",
-    "zh-hant-mo": "zh-hant-hk"
+    "zh-hant-mo": "zh-hant-hk",
   }[sourceLocale]
 }
 
@@ -520,3 +576,12 @@ export function catalogMigration(
 
 const pipe = (...functions: Array<Function>) => (args: any): any =>
   functions.reduce((arg, fn) => fn(arg), args)
+
+/** Typescript loader using just typescript API and eval(), instead of using ts-node/register which is slower */
+function TypeScriptLoader(filePath: string) {
+  const tsc = require("typescript")
+  const fileContent = fs.readFileSync(filePath, "utf-8")
+  const { outputText } = tsc.transpileModule(fileContent, { compilerOptions: { module: tsc.ModuleKind.CommonJS }});
+  const configFileParsed = eval(outputText)
+  return configFileParsed
+}

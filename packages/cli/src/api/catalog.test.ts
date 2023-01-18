@@ -35,7 +35,7 @@ describe("Catalog", function () {
   })
 
   describe("make", function () {
-    it("should collect and write catalogs", function () {
+    it("should collect and write catalogs", async function () {
       const localeDir = copyFixture(fixture("locales", "initial"))
       const catalog = new Catalog(
         {
@@ -55,11 +55,11 @@ describe("Catalog", function () {
       // Everything should be empty
       expect(catalog.readAll()).toMatchSnapshot()
 
-      catalog.make(defaultMakeOptions)
+      await catalog.make(defaultMakeOptions)
       expect(catalog.readAll()).toMatchSnapshot()
     })
 
-    it("should only update the specified locale", function () {
+    it("should only update the specified locale", async function () {
       const localeDir = copyFixture(fixture("locales", "initial"))
       const catalog = new Catalog(
         {
@@ -79,11 +79,11 @@ describe("Catalog", function () {
       // Everything should be empty
       expect(catalog.readAll()).toMatchSnapshot()
 
-      catalog.make({ ...defaultMakeOptions, locale: "en" })
+      await catalog.make({ ...defaultMakeOptions, locale: "en" })
       expect(catalog.readAll()).toMatchSnapshot()
     })
 
-    it("should merge with existing catalogs", function () {
+    it("should merge with existing catalogs", async function () {
       const localeDir = copyFixture(fixture("locales", "existing"))
       const catalog = new Catalog(
         {
@@ -100,13 +100,13 @@ describe("Catalog", function () {
       // Everything should be empty
       expect(catalog.readAll()).toMatchSnapshot()
 
-      catalog.make(defaultMakeOptions)
+      await catalog.make(defaultMakeOptions)
       expect(catalog.readAll()).toMatchSnapshot()
     })
   })
 
   describe("makeTemplate", function () {
-    it("should collect and write a template", function () {
+    it("should collect and write a template", async function () {
       const localeDir = copyFixture(fixture("locales", "initial"))
       const catalog = new Catalog(
         {
@@ -126,13 +126,68 @@ describe("Catalog", function () {
       // Everything should be empty
       expect(catalog.readTemplate()).toMatchSnapshot()
 
-      catalog.makeTemplate(defaultMakeTemplateOptions)
+      await catalog.makeTemplate(defaultMakeTemplateOptions)
       expect(catalog.readTemplate()).toMatchSnapshot()
     })
   })
 
+  describe("POT Flow", function () {
+    it("Should merge source messages from template if provided", () => {
+      const catalog = new Catalog(
+        {
+          name: "messages",
+          path: path.resolve(
+            __dirname,
+            path.join("fixtures", "pot-template", "{locale}")
+          ),
+          include: [],
+          exclude: [],
+        },
+        mockConfig({
+          locales: ["en", "pl"],
+        })
+      )
+
+      const translations = catalog.getTranslations("pl", {
+        sourceLocale: "en",
+        fallbackLocales: {
+          default: "en",
+        },
+      })
+
+      expect(translations).toMatchSnapshot()
+    })
+
+    it("Should get translations from template if locale file not presented", () => {
+      const catalog = new Catalog(
+        {
+          name: "messages",
+          path: path.resolve(
+            __dirname,
+            path.join("fixtures", "pot-template", "{locale}")
+          ),
+          include: [],
+          exclude: [],
+        },
+        mockConfig({
+          locales: ["en", "pl"],
+        })
+      )
+
+      const translations = catalog.getTranslations("en", {
+        sourceLocale: "en",
+        fallbackLocales: {
+          default: "en",
+        },
+      })
+
+      console.log(translations)
+      expect(translations).toMatchSnapshot()
+    })
+  })
+
   describe("collect", function () {
-    it("should extract messages from source files", function () {
+    it("should extract messages from source files", async function () {
       const catalog = new Catalog(
         {
           name: "messages",
@@ -143,7 +198,28 @@ describe("Catalog", function () {
         mockConfig()
       )
 
-      const messages = catalog.collect(defaultMakeOptions)
+      const messages = await catalog.collect(defaultMakeOptions)
+      expect(messages).toMatchSnapshot()
+    })
+
+    it("should extract only files passed on options", async function () {
+      const catalog = new Catalog(
+        {
+          name: "messages",
+          path: "locales/{locale}",
+          include: [
+            fixture("collect/componentA"),
+            fixture("collect/componentB.js"),
+          ],
+          exclude: [],
+        },
+        mockConfig()
+      )
+
+      const messages = await catalog.collect({
+        ...defaultMakeOptions,
+        files: [fixture("collect/componentA")],
+      })
       expect(messages).toMatchSnapshot()
     })
 
@@ -158,8 +234,8 @@ describe("Catalog", function () {
         mockConfig()
       )
 
-      mockConsole((console) => {
-        const messages = catalog.collect(defaultMakeOptions)
+      mockConsole(async (console) => {
+        const messages = await catalog.collect(defaultMakeOptions)
         expect(console.error).toBeCalledWith(
           expect.stringContaining(`Cannot process file`)
         )
@@ -312,11 +388,17 @@ describe("Catalog", function () {
             message: "",
             translation: "Message with custom ID",
           }),
+          "Message with <0>auto-generated</0> ID": makePrevMessage({
+            translation: "Source of message with <0>auto-generated</0> ID",
+          }),
         },
         cs: {
           "custom.id": makePrevMessage({
             message: "",
             translation: "Translation of message with custom ID",
+          }),
+          "Message with <0>auto-generated</0> ID": makePrevMessage({
+            translation: "Translation of message with auto-generated ID",
           }),
         },
       }
@@ -325,10 +407,11 @@ describe("Catalog", function () {
         "custom.id": makeNextMessage({
           message: "Message with custom ID, possibly changed",
         }),
+        "Message with <0>auto-generated</0> ID": makeNextMessage(),
       }
 
       // Without `overwrite`:
-      // The translation of `custom.id` message for `sourceLocale` is kept intact
+      // The translations of all IDs for `sourceLocale` are kept intact
       expect(
         makeCatalog({ sourceLocale: "en" }).merge(
           prevCatalogs,
@@ -341,17 +424,23 @@ describe("Catalog", function () {
             message: "Message with custom ID, possibly changed",
             translation: "Message with custom ID",
           }),
+          "Message with <0>auto-generated</0> ID": expect.objectContaining({
+            translation: "Source of message with <0>auto-generated</0> ID",
+          }),
         },
         cs: {
           "custom.id": expect.objectContaining({
             message: "Message with custom ID, possibly changed",
             translation: "Translation of message with custom ID",
           }),
+          "Message with <0>auto-generated</0> ID": expect.objectContaining({
+            translation: "Translation of message with auto-generated ID",
+          }),
         },
       })
 
       // With `overwrite`
-      // The translation of `custom.id` message for `sourceLocale` is changed
+      // The translations of all IDs for `sourceLocale` are changed
       expect(
         makeCatalog({ sourceLocale: "en" }).merge(prevCatalogs, nextCatalog, {
           overwrite: true,
@@ -362,11 +451,17 @@ describe("Catalog", function () {
             message: "Message with custom ID, possibly changed",
             translation: "Message with custom ID, possibly changed",
           }),
+          "Message with <0>auto-generated</0> ID": expect.objectContaining({
+            translation: "Message with <0>auto-generated</0> ID",
+          }),
         },
         cs: {
           "custom.id": expect.objectContaining({
             message: "Message with custom ID, possibly changed",
             translation: "Translation of message with custom ID",
+          }),
+          "Message with <0>auto-generated</0> ID": expect.objectContaining({
+            translation: "Translation of message with auto-generated ID",
           }),
         },
       })
@@ -626,6 +721,34 @@ describe("getCatalogs", function () {
     ])
   })
 
+  it("should expand {name} multiple times in path", function () {
+    mockFs({
+      componentA: {
+        "index.js": mockFs.file(),
+      },
+    })
+
+    const config = mockConfig({
+      catalogs: [
+        {
+          path: "{name}/locales/{locale}/{name}_messages_{locale}",
+          include: ["./{name}/"],
+        },
+      ],
+    })
+    expect(getCatalogs(config)).toEqual([
+      new Catalog(
+        {
+          name: "componentA",
+          path: "componentA/locales/{locale}/componentA_messages_{locale}",
+          include: ["componentA/"],
+          exclude: [],
+        },
+        config
+      ),
+    ])
+  })
+
   it("shouldn't expand {name} for ignored directories", function () {
     mockFs({
       componentA: {
@@ -719,6 +842,23 @@ describe("getCatalogForFile", function () {
     ]
 
     expect(getCatalogForFile("./xyz/en.po", catalogs)).toBeNull()
+  })
+
+  it("should return matching catalog and locale if {locale} is present multiple times in path", function () {
+    const catalog = new Catalog(
+      {
+        name: null,
+        path: "./src/locales/{locale}/messages_{locale}",
+        include: ["./src/"],
+      },
+      mockConfig({ format: "po" })
+    )
+    const catalogs = [catalog]
+
+    expect(getCatalogForFile("./src/locales/en/messages_en.po", catalogs)).toEqual({
+      locale: "en",
+      catalog,
+    })
   })
 
   it("should return matching catalog and locale", function () {
@@ -842,12 +982,12 @@ describe("normalizeRelativePath", function () {
     )
   })
 
-  it("directories without ending slash are correctly treaten as dirs", function() {
+  it("directories without ending slash are correctly treaten as dirs", function () {
     mockFs({
       componentA: {
         "index.js": mockFs.file(),
       },
-      "componentB": mockFs.file(),
+      componentB: mockFs.file(),
     })
     // checked correctly that is a dir, cuz added that ending slash
     expect(normalizeRelativePath("./componentA")).toEqual("componentA/")
@@ -931,57 +1071,32 @@ describe("order", function () {
 })
 
 describe("writeCompiled", function () {
-  it("saves ES modules to .mjs files", function () {
-    const localeDir = copyFixture(fixture("locales", "initial/"))
-    const catalog = new Catalog(
-      {
-        name: "messages",
-        path: path.join(localeDir, "{locale}", "messages"),
-        include: [],
-        exclude: [],
-      },
-      mockConfig()
-    )
+  const localeDir = copyFixture(fixture("locales", "initial/"))
+  const catalog = new Catalog(
+    {
+      name: "messages",
+      path: path.join(localeDir, "{locale}", "messages"),
+      include: [],
+      exclude: [],
+    },
+    mockConfig()
+  )
 
-    const namespace = "es"
-    const compiledCatalog = createCompiledCatalog("en", {}, { namespace })
-    // Test that the file extension of the compiled catalog is `.mjs`
-    expect(catalog.writeCompiled("en", compiledCatalog, namespace)).toMatch(
-      /\.mjs$/
-    )
-  })
-
-  it("saves anything else than ES modules to .js files", function () {
-    const localeDir = copyFixture(fixture("locales", "initial/"))
-    const catalog = new Catalog(
-      {
-        name: "messages",
-        path: path.join(localeDir, "{locale}", "messages"),
-        include: [],
-        exclude: [],
-      },
-      mockConfig()
-    )
-
-    let compiledCatalog = createCompiledCatalog("en", {}, {})
-    // Test that the file extension of the compiled catalog is `.js`
-    expect(catalog.writeCompiled("en", compiledCatalog)).toMatch(/\.js$/)
-
-    compiledCatalog = createCompiledCatalog("en", {}, { namespace: "cjs" })
-    expect(catalog.writeCompiled("en", compiledCatalog)).toMatch(/\.js$/)
-
-    compiledCatalog = createCompiledCatalog(
-      "en",
-      {},
-      { namespace: "window.test" }
-    )
-    expect(catalog.writeCompiled("en", compiledCatalog)).toMatch(/\.js$/)
-
-    compiledCatalog = createCompiledCatalog(
-      "en",
-      {},
-      { namespace: "global.test" }
-    )
-    expect(catalog.writeCompiled("en", compiledCatalog)).toMatch(/\.js$/)
-  })
+  it.each([
+    { namespace: "es", extension: /\.mjs$/ },
+    { namespace: "ts", extension: /\.ts$/ },
+    { namespace: undefined, extension: /\.js$/ },
+    { namespace: "cjs", extension: /\.js$/ },
+    { namespace: "window.test", extension: /\.js$/ },
+    { namespace: "global.test", extension: /\.js$/ },
+  ])(
+    "Should save namespace $namespace in $extension extension",
+    ({ namespace, extension }) => {
+      const compiledCatalog = createCompiledCatalog("en", {}, { namespace })
+      // Test that the file extension of the compiled catalog is `.mjs`
+      expect(catalog.writeCompiled("en", compiledCatalog, namespace)).toMatch(
+        extension
+      )
+    }
+  )
 })

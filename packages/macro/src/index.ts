@@ -1,15 +1,36 @@
-import { createMacro } from "babel-plugin-macros"
+import {createMacro, MacroParams} from "babel-plugin-macros"
 import { getConfig } from "@lingui/conf"
 
 import MacroJS from "./macroJs"
 import MacroJSX from "./macroJsx"
+import {NodePath} from "@babel/traverse"
+import {ImportDeclaration, isImportSpecifier, isIdentifier} from "@babel/types"
 
 const config = getConfig({ configPath: process.env.LINGUI_CONFIG })
-const [i18nImportModule, i18nImportName = "i18n"] = config.runtimeConfigModule
 
-function macro({ references, state, babel }) {
-  const jsxNodes = []
-  const jsNodes = []
+const getSymbolSource = (name: 'i18n' | 'Trans'): [source: string, identifier?: string] => {
+  if (Array.isArray(config.runtimeConfigModule)) {
+    if (name === "i18n") {
+      return config.runtimeConfigModule
+    } else {
+      return ["@lingui/react", name]
+    }
+  } else {
+    if (config.runtimeConfigModule[name]) {
+      return config.runtimeConfigModule[name]
+    } else {
+      return ["@lingui/react", name]
+    }
+  }
+}
+
+const [i18nImportModule, i18nImportName = "i18n"] = getSymbolSource("i18n")
+const [TransImportModule, TransImportName = "Trans"] = getSymbolSource("Trans")
+
+function macro({ references, state, babel }: MacroParams) {
+  const jsxNodes: NodePath[] = []
+  const jsNodes: NodePath[] = []
+  let needsI18nImport = false
 
   Object.keys(references).forEach((tagName) => {
     const nodes = references[tagName]
@@ -33,7 +54,7 @@ function macro({ references, state, babel }) {
   jsNodes.filter(isRootPath(jsNodes)).forEach((path) => {
     if (alreadyVisited(path)) return
     const macro = new MacroJS(babel, { i18nImportName })
-    macro.replacePath(path)
+    if (macro.replacePath(path)) needsI18nImport = true
   })
 
   jsxNodes.filter(isRootPath(jsxNodes)).forEach((path) => {
@@ -42,12 +63,12 @@ function macro({ references, state, babel }) {
     macro.replacePath(path)
   })
 
-  if (jsNodes.length) {
+  if (needsI18nImport) {
     addImport(babel, state, i18nImportModule, i18nImportName)
   }
 
   if (jsxNodes.length) {
-    addImport(babel, state, "@lingui/react", "Trans")
+    addImport(babel, state, TransImportModule, TransImportName)
   }
 
   if (process.env.LINGUI_EXTRACT === "1") {
@@ -57,15 +78,16 @@ function macro({ references, state, babel }) {
   }
 }
 
-function addImport(babel, state, module, importName) {
+function addImport(babel: MacroParams["babel"], state: MacroParams["state"], module: string, importName: string) {
   const { types: t } = babel
 
   const linguiImport = state.file.path.node.body.find(
-    (importNode) =>t.isImportDeclaration(importNode) &&
+    (importNode) =>
+      t.isImportDeclaration(importNode) &&
       importNode.source.value === module &&
       // https://github.com/lingui/js-lingui/issues/777
       importNode.importKind !== "type"
-  )
+  ) as ImportDeclaration
 
   const tIdentifier = t.identifier(importName)
   // Handle adding the import or altering the existing import
@@ -73,7 +95,7 @@ function addImport(babel, state, module, importName) {
     if (
       linguiImport.specifiers.findIndex(
         (specifier) =>
-          specifier.imported && specifier.imported.name === importName
+          isImportSpecifier(specifier) && isIdentifier(specifier.imported, {name: importName})
       ) === -1
     ) {
       linguiImport.specifiers.push(t.importSpecifier(tIdentifier, tIdentifier))
@@ -88,9 +110,9 @@ function addImport(babel, state, module, importName) {
   }
 }
 
-function isRootPath(allPath) {
-  return (node) =>
-    (function traverse(path) {
+function isRootPath(allPath: NodePath[]) {
+  return (node: NodePath) =>
+    (function traverse(path): boolean {
       if (!path.parentPath) {
         return true
       } else {
@@ -99,20 +121,18 @@ function isRootPath(allPath) {
     })(node)
 }
 
-const alreadyVisitedCache = []
-
-function alreadyVisited(path) {
-  if (alreadyVisitedCache.includes(path)) {
+const alreadyVisitedCache = new WeakSet()
+const alreadyVisited = (path: NodePath) => {
+  if (alreadyVisitedCache.has(path)) {
     return true
   } else {
-    alreadyVisitedCache.push(path)
+    alreadyVisitedCache.add(path)
     return false
   }
 }
 
-function getMacroType(tagName) {
+function getMacroType(tagName: string): string {
   switch (tagName) {
-    case "defineMessages":
     case "defineMessage":
     case "arg":
     case "t":

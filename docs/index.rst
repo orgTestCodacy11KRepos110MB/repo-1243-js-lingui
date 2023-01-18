@@ -56,7 +56,7 @@ Lightweight and optimized
    That's less than Redux for a full-featured intl library.
 
 Active community
-   Join us on `Gitter`_ to discuss the latest development.
+   Join us on `Discord`_ to discuss the latest development.
    At the moment, Lingui is the most active intl project on GitHub.
 
 Compatible with react-intl
@@ -104,6 +104,14 @@ Documentation contents
 
 .. toctree::
    :maxdepth: 1
+   :caption: Sync & Collaboration Tools
+
+   Introduction <tools/introduction>
+   Translation.io <tools/translation-io>
+   Crowdin <tools/crowdin>
+
+.. toctree::
+   :maxdepth: 1
    :caption: API References
 
    Core (JavaScript) <ref/core>
@@ -113,6 +121,7 @@ Documentation contents
    Configuration <ref/conf>
    Locale Detection <ref/locale-detector>
    Webpack Loader <ref/loader>
+   Snowpack Plugin <ref/snowpack-plugin>
    Catalog Formats <ref/catalog-formats>
    ICU MessageFormat <ref/message-format>
 
@@ -140,4 +149,4 @@ Indices
 * :ref:`genindex`
 * :ref:`search`
 
-.. _Gitter: https://gitter.im/lingui/js-lingui
+.. _Discord: https://discord.gg/gFWwAYnMtA

@@ -5,15 +5,19 @@ import { getConfig, LinguiConfig } from "@lingui/conf"
 
 import { getCatalogs } from "./api/catalog"
 import { detect } from "./api/detect"
+import { ExtractorType } from "./api/extractors"
 
 export type CliExtractTemplateOptions = {
   verbose: boolean
+  configPath: string
+  extractors?: ExtractorType[]
+  files?: string[]
 }
 
-export default function command(
+export default async function command(
   config: LinguiConfig,
   options: Partial<CliExtractTemplateOptions>
-): boolean {
+): Promise<boolean> {
   // `react-app` babel plugin used by CRA requires either BABEL_ENV or NODE_ENV to be
   // set. We're setting it here, because lingui macros are going to use them as well.
   if (!process.env.BABEL_ENV && !process.env.NODE_ENV) {
@@ -28,15 +32,21 @@ export default function command(
   options.verbose && console.error("Extracting messages from source files…")
   const catalogs = getCatalogs(config)
   const catalogStats: { [path: string]: Number } = {}
-  catalogs.forEach((catalog) => {
-    catalog.makeTemplate({
-      ...options,
+
+  await Promise.all(catalogs.map(async (catalog) => {
+    await catalog.makeTemplate({
+      ...options as CliExtractTemplateOptions,
       orderBy: config.orderBy,
       projectType: detect(),
     })
-
-    catalogStats[catalog.templateFile] = Object.keys(catalog.readTemplate()).length
-  })
+    const catalogTemplate = catalog.readTemplate()
+    if (
+      catalogTemplate !== null &&
+      catalogTemplate !== undefined
+    ) {
+      catalogStats[catalog.templateFile] = Object.keys(catalogTemplate).length
+    }
+  }))
 
   Object.entries(catalogStats).forEach(([key, value]) => {
     console.log(
@@ -55,11 +65,13 @@ if (require.main === module) {
     .option("--verbose", "Verbose output")
     .parse(process.argv)
 
-  const config = getConfig({ configPath: program.config })
+  const config = getConfig({ configPath: program.config || process.env.LINGUI_CONFIG })
 
   const result = command(config, {
     verbose: program.verbose || false,
+    configPath: program.config || process.env.LINGUI_CONFIG,
+  }).then(() => {
+    if (!result) process.exit(1)
   })
 
-  if (!result) process.exit(1)
 }

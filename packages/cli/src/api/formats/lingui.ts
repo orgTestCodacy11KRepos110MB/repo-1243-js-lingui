@@ -2,7 +2,7 @@ import fs from "fs"
 import * as R from "ramda"
 
 import { writeFileIfChanged } from "../utils"
-import { CatalogType } from "../catalog"
+import { ExtractedMessageType, CatalogType } from "../catalog"
 import { CatalogFormatter } from "."
 
 type NoOriginsCatalogType = {
@@ -13,6 +13,19 @@ const removeOrigins = (R.map(
   ({ origin, ...message }) => message
 ) as unknown) as (catalog: CatalogType) => NoOriginsCatalogType
 
+const removeLineNumbers = (R.map(
+  (message: ExtractedMessageType) => {
+    if (message.origin) {
+      message.origin.map(originValue => {
+        originValue.pop()
+        return originValue
+      })
+    }
+    return message
+  }
+) as unknown) as (catalog: ExtractedMessageType) => NoOriginsCatalogType
+
+
 const lingui: CatalogFormatter = {
   catalogExtension: ".json",
 
@@ -20,6 +33,9 @@ const lingui: CatalogFormatter = {
     let outputCatalog: CatalogType | NoOriginsCatalogType = catalog
     if (options.origins === false) {
       outputCatalog = removeOrigins(catalog)
+    }
+    if (options.origins !== false && options.lineNumbers === false) {
+      outputCatalog = removeLineNumbers(outputCatalog)
     }
     writeFileIfChanged(filename, JSON.stringify(outputCatalog, null, 2))
   },
@@ -30,10 +46,13 @@ const lingui: CatalogFormatter = {
     try {
       return JSON.parse(raw)
     } catch (e) {
-      console.error(`Cannot read ${filename}: ${e.message}`)
-      return null
+      throw new Error(`Cannot read ${filename}: ${e.message}`)
     }
   },
+
+  parse(content) {
+    return content
+  }
 }
 
 export default lingui

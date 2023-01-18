@@ -2,7 +2,7 @@
 @lingui/macro - Reference
 *************************
 
-``@lingui/macro`` package provides `babel macros <babel-plugin-macros>`_ which
+``@lingui/macro`` package provides `babel macros <https://github.com/kentcdodds/babel-plugin-macros>`_ which
 transforms JavaScript objects and JSX elements into messages in ICU MessageFormat.
 
 Installation
@@ -70,13 +70,14 @@ transformed into ``i18n._`` call.
    // ↓ ↓ ↓ ↓ ↓ ↓
 
    import { i18n } from "@lingui/core"
-   i18n._(/*i18n*/{ id: "Attachment {name} saved", values: { name }})
+   /*i18n*/
+   i18n._("Attachment {name} saved", { name })
 
 .. note::
 
    By default, the ``i18n`` object is imported from ``@lingui/core``.
    If you use a custom instance of ``i18n`` object, you need to set
-   :conf:`runtimeConfigModule`
+   :conf:`runtimeConfigModule` or pass a custom instance to :jsmacro:`t`.
 
 The only exception is :jsmacro:`defineMessage` which is transformed into
 message descriptor. In other words, the message isn't translated directly
@@ -111,30 +112,30 @@ Examples of JS macros
 +=============================================================+====================================================================+
 | .. code-block:: js                                          | .. code-block:: js                                                 |
 |                                                             |                                                                    |
-|    t`Refresh inbox`                                         |    i18n._(/*i18n*/{                                                |
-|                                                             |      id: "Refresh inbox"                                           |
-|                                                             |    })                                                              |
+|    t`Refresh inbox`                                         |    /*i18n*/                                                        |
+|                                                             |    i18n._("Refresh inbox")                                         |
 +-------------------------------------------------------------+--------------------------------------------------------------------+
 | .. code-block:: js                                          | .. code-block:: js                                                 |
 |                                                             |                                                                    |
-|    t`Attachment ${name} saved`                              |    i18n._(/*i18n*/{                                                |
-|                                                             |      id: "Attachment {name} saved",                                |
-|                                                             |      values: { name }                                              |
-|                                                             |    })                                                              |
+|    t`Attachment ${name} saved`                              |    /*i18n*/                                                        |
+|                                                             |    i18n._("Attachment {name} saved", { name })                     |
 +-------------------------------------------------------------+--------------------------------------------------------------------+
 | .. code-block:: js                                          | .. code-block:: js                                                 |
 |                                                             |                                                                    |
-|    plural(count, {                                          |    i18n._(/*i18n*/{                                                |
-|       one: "Message",                                       |      id: "{count, plural, one {Message} other {Messages}}",        |
-|       other: "Messages"                                     |      values: { count }                                             |
+|    t(customI18n)`Refresh inbox`                             |    /*i18n*/                                                        |
+|                                                             |    customI18n._("Refresh inbox")                                   |
++-------------------------------------------------------------+--------------------------------------------------------------------+
+| .. code-block:: js                                          | .. code-block:: js                                                 |
+|                                                             |                                                                    |
+|    t(customI18n)`Attachment ${name} saved`                  |    /*i18n*/                                                        |
+|                                                             |    customI18n._("Attachment {name} saved", { name })               |
++-------------------------------------------------------------+--------------------------------------------------------------------+
+| .. code-block:: js                                          | .. code-block:: js                                                 |
+|                                                             |                                                                    |
+|    plural(count, {                                          |    /*i18n*/                                                        |
+|       one: "Message",                                       |    i18n._("{count, plural, one {Message} other {Messages}}", {     |
+|       other: "Messages"                                     |      count                                                         |
 |    })                                                       |    })                                                              |
-+-------------------------------------------------------------+--------------------------------------------------------------------+
-| .. code-block:: js                                          | .. code-block:: js                                                 |
-|                                                             |                                                                    |
-|    t`Today is ${date(today)}`                               |    i18n._(/*i18n*/{                                                |
-|                                                             |      id: "Today is {0}",                                           |
-|                                                             |      values: { 0: date(today) }                                    |
-|                                                             |    })                                                              |
 +-------------------------------------------------------------+--------------------------------------------------------------------+
 | .. code-block:: js                                          | .. code-block:: js                                                 |
 |                                                             |                                                                    |
@@ -145,7 +146,14 @@ Examples of JS macros
 +-------------------------------------------------------------+--------------------------------------------------------------------+
 | .. code-block:: js                                          | .. code-block:: js                                                 |
 |                                                             |                                                                    |
-|    describeMessage({                                        |    /*i18n*/{                                                       |
+|    t(customI18n)({                                          |    customI18n._(/*i18n*/{                                          |
+|       id: "msg.refresh",                                    |      id: "msg.refresh",                                            |
+|       message: "Refresh inbox"                              |      message: "Refresh inbox"                                      |
+|    })                                                       |    })                                                              |
++-------------------------------------------------------------+--------------------------------------------------------------------+
+| .. code-block:: js                                          | .. code-block:: js                                                 |
+|                                                             |                                                                    |
+|    defineMessage({                                          |    /*i18n*/{                                                       |
 |       id: "msg.refresh",                                    |      id: "msg.refresh",                                            |
 |       message: "Refresh inbox"                              |      message: "Refresh inbox"                                      |
 |    })                                                       |    }                                                               |
@@ -168,16 +176,9 @@ Examples of JSX macros
 |                                                             |                                                                    |
 |    <Plural                                                  |    <Trans                                                          |
 |       value={count}                                         |       id="{count, plural, one { Message} other {Messages}}"        |
-|       one="Message"                                         |       values={{ name }}                                            |
+|       one="Message"                                         |       values={{ count }}                                           |
 |       other="Messages"                                      |    />                                                              |
 |    />                                                       |                                                                    |
-+-------------------------------------------------------------+--------------------------------------------------------------------+
-| .. code-block:: jsx                                         | .. code-block:: jsx                                                |
-|                                                             |                                                                    |
-|    <Trans>Today is {date(today)}</Trans>                    |    <Trans                                                          |
-|                                                             |       id="Today is {0}"                                            |
-|                                                             |       values={{ 0: date(today) }}                                  |
-|                                                             |    />                                                              |
 +-------------------------------------------------------------+--------------------------------------------------------------------+
 | .. code-block:: jsx                                         | .. code-block:: jsx                                                |
 |                                                             |                                                                    |
@@ -200,7 +201,7 @@ into a *Message Descriptor* wrapped inside of ``i18n._`` call.
 
    By default, the ``i18n`` object is imported from ``@lingui/core``.
    If you use a custom instance of ``i18n`` object, you need to set
-   :conf:`runtimeConfigModule`
+   :conf:`runtimeConfigModule` or pass a custom instance to :jsmacro:`t`.
 
 *Message Descriptor* is an object with message ID, default message and other parameters.
 ``i18n._`` accepts message descriptors and performs translation and formatting:
@@ -242,9 +243,9 @@ in ICU MessageFormat:
    // ↓ ↓ ↓ ↓ ↓ ↓
 
    import { i18n } from "@lingui/core"
-   const message = i18n._(/*i18n*/{
-     id: 'Hello World',
-   })
+   const message =
+   /*i18n*/
+   i18n._("Hello World")
 
 Message variables are supported:
 
@@ -256,9 +257,10 @@ Message variables are supported:
    // ↓ ↓ ↓ ↓ ↓ ↓
 
    import { i18n } from "@lingui/core"
-   const message = i18n._(/*i18n*/{
-     id: 'My name is {name}',
-     values: { name }
+   const message =
+   /*i18n*/
+   i18n._("My name is {name}", {
+     name
    })
 
 In fact, any expression can be used inside template literal. However, only
@@ -268,15 +270,33 @@ other expressions are referenced by numeric index:
 .. code-block:: jsx
 
    import { t } from "@lingui/macro"
-   const message = t`Today is ${date(name)}`
+   const message = t`Today is ${new Date()}`
 
    // ↓ ↓ ↓ ↓ ↓ ↓
 
-   import { i18n } from "@lingui/core"
-   const message = i18n._(/*i18n*/{
-     id: 'Today is {0}',
-     values: { 0: date(name) }
-   })
+   import { i18n } from "@lingui/core";
+
+   const message =
+   /*i18n*/
+   i18n._("Today is {0}", {
+     0: new Date()
+   });
+
+Optionally, a custom ``i18n`` instance can be passed that can be used
+instead of the global instance:
+
+.. code-block:: jsx
+
+   import { t } from "@lingui/macro"
+   import { i18n } from "./lingui"
+   const message = t(i18n)`Hello World`
+
+   // ↓ ↓ ↓ ↓ ↓ ↓
+
+   import { i18n } from "./lingui"
+   const message =
+   /*i18n*/
+   i18n._("Hello World")
 
 It's also possible to pass custom ``id`` and ``comment`` for translators by
 calling ``t`` macro with a message descriptor:
@@ -296,7 +316,8 @@ calling ``t`` macro with a message descriptor:
    const message = i18n._(/*i18n*/{
       id: 'msg.hello',
       comment: 'Greetings at the homepage',
-      message: 'Hello {name}'
+      message: 'Hello {name}',
+      values: { name }
    })
 
 In this case the ``message`` is used as a default message and it's transformed
@@ -315,7 +336,8 @@ as if it were wrapped in ``t`` macro. ``message`` also accepts any other macros:
    import { i18n } from "@lingui/core"
    const message = i18n._(/*i18n*/{
       id: 'msg.plural',
-      message: '{value, plural, one {...} other {...}}'
+      message: '{value, plural, one {...} other {...}}',
+      values: { value }
    })
 
 plural
@@ -344,9 +366,10 @@ used in the source code depends on your source locale (e.g. English has only
    // ↓ ↓ ↓ ↓ ↓ ↓
 
    import { i18n } from "@lingui/core"
-   const message = i18n._(/*i18n*/{
-     id: '{count, plural, one {# Book} other {# Books}}',
-     values: { count }
+   const message =
+   /*i18n*/
+   i18n._('{count, plural, one {# Book} other {# Books}}', {
+     count
    })
 
 If you need to add variables to plural form, you can use template string literals.
@@ -364,9 +387,10 @@ are transformed automatically:
    // ↓ ↓ ↓ ↓ ↓ ↓
 
    import { i18n } from "@lingui/core"
-   const message = i18n._(/*i18n*/{
-     id: '{count, plural, one {{name} has # friend} other {{name} has # friends}}',
-     values: { count }
+   const message =
+   /*i18n*/
+   i18n._('{count, plural, one {{name} has # friend} other {{name} has # friends}}', {
+     count, name
    })
 
 Plurals can also be nested to form complex messages. Here's an example using
@@ -390,19 +414,20 @@ two counters:
    // Generated message was wrapped for better readability
 
    import { i18n } from "@lingui/core"
-   const message = i18n._(/*i18n*/{
-     id: `{count, plural,
+   const message =
+   /*i18n*/
+   i18n._(`{numBooks, plural,
             one {{numArticles, plural,
                one {1 book and 1 article}
                other {1 book and {numArticles} articles}
-            }
+            }}
             other {{numArticles, plural,
                one {{numBooks} books and 1 article}
-               other {{numBooks} books and {numArticles} articles
-            }
+               other {{numBooks} books and {numArticles} articles}
+            }}
          }`,
-     values: { numBooks numArticles }
-   })
+     { numBooks, numArticles }
+   )
 
 .. note::
 
@@ -431,18 +456,19 @@ cardinal plural forms it uses ordinal forms:
 
    import { selectOrdinal } from "@lingui/macro"
    const message = selectOrdinal(count, {
-      one: "1st",
-      two: "2nd",
-      few: "3rd",
+      one: "#st",
+      two: "#nd",
+      few: "#rd",
       other: "#th",
    })
 
    // ↓ ↓ ↓ ↓ ↓ ↓
 
    import { i18n } from "@lingui/core"
-   const message = i18n._(/*i18n*/{
-     id: '{count, selectOrdinal, one {1st} two {2nd} few {3rd} other {#th}}',
-     values: { count }
+   const message =
+   /*i18n*/
+   i18n._('{count, selectOrdinal, one {#st} two {#nd} few {#rd} other {#th}}', {
+     count
    })
 
 .. important::
@@ -474,9 +500,10 @@ provided in ``options`` object which key matches exactly ``value``:
    // ↓ ↓ ↓ ↓ ↓ ↓
 
    import { i18n } from "@lingui/core"
-   const message = i18n._(/*i18n*/{
-     id: '{gender, select, male {he} female {she} other {they}}',
-     values: { gender }
+   const message =
+   /*i18n*/
+   i18n._('{gender, select, male {he} female {she} other {they}}', {
+     gender
    })
 
 .. important::
@@ -721,6 +748,7 @@ but in React this isn't a valid prop name. Therefore, exact matches are expresse
    <Plural
        value={count}
        offset={1}
+
        // when value == 0
        _0="Nobody arrived"
 
@@ -735,11 +763,13 @@ but in React this isn't a valid prop name. Therefore, exact matches are expresse
        other="You and # other guests arrived"
    />
 
-   // This is transformed to Trans component with ID:
-   // {count, plural, _0    {Nobody arrived}
-   //                 _1    {Only you arrived}
-   //                 one   {You and # other guest arrived}
-   //                 other {You and # other guests arrived}}
+   /*
+     This is transformed to Trans component with ID:
+     {count, plural, offset:1 _0    {Nobody arrived}
+                              _1    {Only you arrived}
+                              one   {You and # other guest arrived}
+                              other {You and # other guests arrived}}
+   */
 
 SelectOrdinal
 ^^^^^^^^^^^^^
@@ -772,9 +802,9 @@ format:
    // count == 4 -> 4th
    <SelectOrdinal
        value={count}
-       one="1st"
-       two="2nd"
-       few="3rd"
+       one="#st"
+       two="#nd"
+       few="#rd"
        other="#th"
    />
 

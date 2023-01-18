@@ -1,4 +1,6 @@
-export default [
+import {TestCase} from "./index"
+
+const cases: TestCase[] = [
   {
     input: `
         import { Select } from '@lingui/macro';
@@ -11,7 +13,7 @@ export default [
       `,
     expected: `
         import { Trans } from "@lingui/react";
-        <Trans id="{count, select, male {He} female {She} other {<0>Other</0>}}" values={{
+        <Trans id={"{count, select, male {He} female {She} other {<0>Other</0>}}"} values={{
           count: count
         }} components={{
           0: <strong />
@@ -32,7 +34,7 @@ export default [
       `,
     expected: `
         import { Trans } from "@lingui/react";
-        <Trans render="strong" id="msg.select" message="{0, select, male {He} female {She} other {<0>Other</0>}}" values={{
+        <Trans render="strong" id="msg.select" message={"{0, select, male {He} female {She} other {<0>Other</0>}}"} values={{
           0: user.gender
         }} components={{
           0: <strong />
@@ -40,3 +42,4 @@ export default [
       `,
   },
 ]
+export default cases;

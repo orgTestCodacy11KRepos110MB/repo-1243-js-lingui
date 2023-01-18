@@ -9,7 +9,7 @@ import { CatalogFormatter } from "."
 
 const getCreateHeaders = (language = "no") => ({
   "POT-Creation-Date": formatDate(new Date(), "yyyy-MM-dd HH:mmxxxx"),
-  "Mime-Version": "1.0",
+  "MIME-Version": "1.0",
   "Content-Type": "text/plain; charset=utf-8",
   "Content-Transfer-Encoding": "8bit",
   "X-Generator": "@lingui/cli",
@@ -25,8 +25,15 @@ const serialize = (items: CatalogType, options) =>
       item.msgstr = [message.translation]
       item.comments = message.comments || []
       item.extractedComments = message.extractedComments || []
-      if (options.origins) {
-        item.references = message.origin ? message.origin.map(joinOrigin) : []
+      if (message.context) {
+        item.msgctxt = message.context
+      }
+      if (options.origins !== false) {
+        if (message.origin && options.lineNumbers === false) {
+          item.references = message.origin.map(([path]) => path);
+        } else {
+          item.references = message.origin ? message.origin.map(joinOrigin) : []
+        }
       }
       // @ts-ignore: Figure out how to set this flag
       item.obsolete = message.obsolete
@@ -41,6 +48,7 @@ const getMessageKey = R.prop<"msgid", string>("msgid")
 const getTranslations = R.prop("msgstr")
 const getExtractedComments = R.prop("extractedComments")
 const getTranslatorComments = R.prop("comments")
+const getMessageContext = R.prop("msgctxt")
 const getOrigins = R.prop("references")
 const getFlags = R.compose(
   R.map(R.trim),
@@ -55,6 +63,7 @@ const deserialize: (item: Object) => Object = R.map(
     translation: R.compose(R.head, R.defaultTo([]), getTranslations),
     extractedComments: R.compose(R.defaultTo([]), getExtractedComments),
     comments: R.compose(R.defaultTo([]), getTranslatorComments),
+    context: R.compose(R.defaultTo(null), getMessageContext),
     obsolete: isObsolete,
     origin: R.compose(R.map(splitOrigin), R.defaultTo([]), getOrigins),
     flags: getFlags,
@@ -62,6 +71,9 @@ const deserialize: (item: Object) => Object = R.map(
 )
 
 type POItem = InstanceType<typeof PO.Item>
+type PoFormatter = {
+  parse: (raw: string) => Object
+}
 
 const validateItems = R.forEach<POItem>((item) => {
   if (R.length(getTranslations(item)) > 1) {
@@ -74,7 +86,7 @@ const validateItems = R.forEach<POItem>((item) => {
 
 const indexItems = R.indexBy(getMessageKey)
 
-const po: CatalogFormatter = {
+const po: CatalogFormatter & PoFormatter = {
   catalogExtension: ".po",
 
   write(filename, catalog, options) {
@@ -99,8 +111,7 @@ const po: CatalogFormatter = {
     return this.parse(raw)
   },
 
-  // @ts-ignore
-  parse(raw) {
+  parse(raw: string) {
     const po = PO.parse(raw)
     validateItems(po.items)
     return deserialize(indexItems(po.items))

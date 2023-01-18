@@ -6,7 +6,7 @@ import { BabelOptions, ExtractorType } from "."
 import { projectType } from "../detect"
 
 const babelRe = new RegExp(
-	"\\.(" + DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join("|") + ")$",
+	"\\.(" + [...DEFAULT_EXTENSIONS, ".ts", ".tsx"].map(ext => ext.slice(1)).join("|") + ")$",
 	"i"
 )
 
@@ -16,7 +16,7 @@ const extractor: ExtractorType = {
   },
 
   extract(filename, localeDir, options = {}) {
-    const { babelOptions: _babelOptions = {} } = options
+    const { babelOptions: _babelOptions = {}, configPath } = options
     const { plugins = [], ...babelOptions } = _babelOptions
     const frameworkOptions: BabelOptions = {}
 
@@ -27,7 +27,10 @@ const extractor: ExtractorType = {
     transformFileSync(filename, {
       ...babelOptions,
       ...frameworkOptions,
-      plugins: ["macros", [linguiExtractMessages, { localeDir }], ...plugins],
+      // we override envName to avoid issues with NODE_ENV=production
+      // https://github.com/lingui/js-lingui/issues/952
+      envName: "development",
+      plugins: ["macros", [linguiExtractMessages, { localeDir, configPath }], ...plugins],
     })
   },
 }

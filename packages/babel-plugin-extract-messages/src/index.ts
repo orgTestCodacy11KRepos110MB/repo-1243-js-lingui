@@ -17,29 +17,117 @@ const VISITED = Symbol("I18nVisited")
 function addMessage(
   path,
   messages,
-  { id, message: newDefault, origin, comment, ...props }
+  { id, message: newDefault, origin, comment, context, ...props }
 ) {
-  if (messages.has(id)) {
-    const message = messages.get(id)
+  // prevent from adding undefined msgid
+  if (id === undefined) return
 
-    // only set/check default language when it's defined.
-    if (message.message && newDefault && message.message !== newDefault) {
-      throw path.buildCodeFrameError(
-        "Different defaults for the same message ID."
-      )
+  const extractedComments = comment ? [comment] : []
+
+  if (context) {
+    if (messages.has(context)) {
+      const existingContext = messages.get(context)
+      if (existingContext.has(id)) {
+        const message = messages.get(id)
+        // only set/check default language when it's defined.
+        if (message.message && newDefault && message.message !== newDefault) {
+          throw path.buildCodeFrameError(
+            "Different defaults for the same message ID."
+          )
+        }
+  
+        if (newDefault) {
+          message.message = newDefault
+        }
+
+        ;[].push.apply(message.origin, origin)
+        
+        if (comment) {
+          ;[].push.apply(message.extractedComments, [comment])
+        }
+      } else {
+        existingContext.set(id, { ...props, message: newDefault, origin, extractedComments })
+        messages.set(context, existingContext)
+      }
     } else {
+      const newContext = new Map();
+      newContext.set(id, { ...props, message: newDefault, origin, extractedComments })
+      messages.set(context, newContext)
+    }
+  } else {
+    if (messages.has(id)) {
+      const message = messages.get(id)
+  
+      // only set/check default language when it's defined.
+      if (message.message && newDefault && message.message !== newDefault) {
+        throw path.buildCodeFrameError(
+          "Different defaults for the same message ID."
+        )
+      }
+  
       if (newDefault) {
         message.message = newDefault
       }
-
+  
       ;[].push.apply(message.origin, origin)
       if (comment) {
         ;[].push.apply(message.extractedComments, [comment])
       }
+    } else {
+      messages.set(id, { ...props, message: newDefault, origin, extractedComments })
     }
+  }
+}
+
+/**
+ * An ES6 Map type is not possible to encode with JSON.stringify,
+ * so we can instead use a replacer function as an argument to 
+ * tell the JSON parser how to serialize / deserialize the Maps
+ * it encounters.
+ */
+function mapReplacer(key, value) {
+  if (value instanceof Map) {
+    const object = {}
+    value.forEach((v, k) => {
+      return object[k] = v;
+    });
+    return object;
+  }
+  return value;
+}
+
+function extractStringContatentation(t, node, error): string {
+  if (t.isStringLiteral(node)) {
+    return node.value
+  } else if (t.isBinaryExpression(node)) {
+    return (
+      extractStringContatentation(t, node.left, error) +
+      extractStringContatentation(t, node.right, error)
+    )
   } else {
-    const extractedComments = comment ? [comment] : []
-    messages.set(id, { ...props, message: newDefault, origin, extractedComments })
+    throw error
+  }
+}
+
+function extractCommentString(t, path, valuePath, valueObj): string {
+  if (t.isStringLiteral(valueObj)) {
+    // Comment is a single line string
+    return valueObj.value;
+  }
+
+  // Comment is a multi-line string.
+  const errorIfNotAString = path
+    .get(valuePath)
+    .buildCodeFrameError("Only strings are supported as comments.")
+
+  if (t.isBinaryExpression(valueObj)) {
+    return extractStringContatentation(
+      t,
+      valueObj,
+      errorIfNotAString
+    )
+  } else {
+    throw errorIfNotAString
   }
 }
 
@@ -114,7 +202,7 @@ export default function ({ types: t }) {
 
         const props = attrs.reduce((acc, item) => {
           const key = item.name.name
-          if (key === "id" || key === "message" || key === "comment") {
+          if (key === "id" || key === "message" || key === "comment" || key === "context") {
             if (item.value.value) {
               acc[key] = item.value.value
             } else if (
@@ -154,25 +242,32 @@ export default function ({ types: t }) {
             )
           }
         )
-        if (!hasComment) return
-
+        
+        const isNonMacroI18n = isI18nMethod(path.node.callee) && !hasComment && path.node.arguments[0] && !path.node.arguments[0].leadingComments;
+        if (!hasComment && !isNonMacroI18n) return;
         const props = {
-          id: path.node.arguments[0].value,
-        }
+          id: path.node.arguments[0].value
+        };
 
         if (!props.id) {
-          console.warn("Missing message ID, skipping.")
+          console.warn("Missing message ID, skipping.");
           console.warn(generate(path.node).code)
-          return
+          return;
         }
 
-        const copyOptions = ["message", "comment"]
+        const copyOptions = ["message", "comment", "context"]
 
         if (t.isObjectExpression(path.node.arguments[2])) {
-          path.node.arguments[2].properties.forEach((property) => {
-            if (!copyOptions.includes(property.key.name)) return
+          path.node.arguments[2].properties.forEach(({key, value}, i) => {
+            if (!copyOptions.includes(key.name)) return
 
-            props[property.key.name] = property.value.value
+            let valueToExtract = value.value;
+
+            if (key.name === "comment") {
+              valueToExtract = extractCommentString(t, path, `arguments.2.properties.${i}.value`, value);
+            }
+
+            props[key.name] = valueToExtract
           })
         }
 
@@ -225,17 +320,22 @@ export default function ({ types: t }) {
         visited.add(path.node)
 
         const props = {}
-        const copyProps = ["id", "message", "comment"]
+        const copyProps = ["id", "message", "comment", "context"]
         path.node.properties
           .filter(({ key }) => copyProps.indexOf(key.name) !== -1)
           .forEach(({ key, value }, i) => {
-            if (key.name === "comment" && !t.isStringLiteral(value)) {
-              throw path
-                .get(`properties.${i}.value`)
-                .buildCodeFrameError("Only strings are supported as comments.")
-            }
+            // By default, the value is just the string value of the object property.
+            let valueToExtract = value.value;
 
-            props[key.name] = value.value
+            if (key.name === "comment") {
+              valueToExtract = extractCommentString(t, path, `properties.${i}.value`, value);
+            } else if (key.name === "id") {
+                const isIdLiteral = !value.value && t.isTemplateLiteral(value)
+                if (isIdLiteral) {
+                    valueToExtract = value?.quasis[0]?.value?.cooked;
+                }
+            }
+            props[key.name] = valueToExtract;
           })
 
         collectMessage(path, file, props)
@@ -249,7 +349,7 @@ export default function ({ types: t }) {
       // Config was already validated in CLI.
       file.set(
         CONFIG,
-        getConfig({ cwd: file.opts.filename, skipValidation: true })
+        getConfig({ cwd: file.opts.filename, skipValidation: true, configPath: this.opts.configPath })
       )
 
       // Ignore else path for now. Collision is possible if other plugin is
@@ -295,7 +395,7 @@ export default function ({ types: t }) {
         catalog[key] = value
       })
 
-      fs.writeFileSync(catalogFilename, JSON.stringify(catalog, null, 2))
+      fs.writeFileSync(catalogFilename, JSON.stringify(catalog, mapReplacer, 2))
     },
   }
 }

@@ -3,6 +3,539 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.16.0](https://github.com/lingui/js-lingui/compare/v3.15.0...v3.16.0) (2023-01-18)
+
+
+### Bug Fixes
+
+* **cli:** {locale} and {name} replace only once in catalog path ([#1342](https://github.com/lingui/js-lingui/issues/1342)) ([9e2d7d2](https://github.com/lingui/js-lingui/commit/9e2d7d28147169e70e9e54bc61d09745a1cbf813))
+* **cli:** catalogsMergePath doesn't merge catalogs ([#1341](https://github.com/lingui/js-lingui/issues/1341)) ([12ad0df](https://github.com/lingui/js-lingui/commit/12ad0dfa69004e1aeb3ac4aad57e6c7bf2325bad))
+* Dynamic versioning of internal packages ([#1332](https://github.com/lingui/js-lingui/issues/1332)) ([a1ff393](https://github.com/lingui/js-lingui/commit/a1ff393ec14cc4ce44cf2717eee80bd77312b8c1))
+* **macro:** Extraction outputting empty objects ([#1331](https://github.com/lingui/js-lingui/issues/1331)) ([261265f](https://github.com/lingui/js-lingui/commit/261265f8a838386caa13d153e56e25363d806c19))
+* Local development not working on Windows ([ad9b735](https://github.com/lingui/js-lingui/commit/ad9b73566b105e13812da2f515116ed1cf80c3e8))
+* **types:** `<Trans>`can have an `i18n` props ([#1308](https://github.com/lingui/js-lingui/issues/1308)) ([de01f8d](https://github.com/lingui/js-lingui/commit/de01f8df0d814f2a42d26d7235c72d4592325ad3))
+
+
+### Features
+
+* `lingui extract` should fail with a non-zero exit code when there are extraction failures ([#1299](https://github.com/lingui/js-lingui/issues/1299)) ([c863322](https://github.com/lingui/js-lingui/commit/c863322a5f4706cc888ea351c463e7a343cc6dfd))
+* allow extract to work with i18n._ calls not created from macro ([#1309](https://github.com/lingui/js-lingui/issues/1309)) ([90be171](https://github.com/lingui/js-lingui/commit/90be1719becc4710c910ea16928b7ce41ef9ab19))
+
+
+
+
+
+# [3.15.0](https://github.com/lingui/js-lingui/compare/v3.14.0...v3.15.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* add null undefined check ([016ff0e](https://github.com/lingui/js-lingui/commit/016ff0e4812b68a699cb06a3f8824b50cbef2e22))
+* allow lingui compile to compile without plural ([#1280](https://github.com/lingui/js-lingui/issues/1280)) ([be265ef](https://github.com/lingui/js-lingui/commit/be265efbfa1f6276314141daaf0c352ea96ad892))
+* extract-template async race issue ([#1279](https://github.com/lingui/js-lingui/issues/1279)) ([a69ed8f](https://github.com/lingui/js-lingui/commit/a69ed8f713eb7f895158ea3b5f0ef99c26b63578))
+* Make pseudolocal use the message AST instead of the key ([#1293](https://github.com/lingui/js-lingui/issues/1293)) ([7c85cb7](https://github.com/lingui/js-lingui/commit/7c85cb70b3b791951a9239c037aa73bb890c26e6))
+* Pass formatter to pluralization function ([#1294](https://github.com/lingui/js-lingui/issues/1294)) ([33af3ba](https://github.com/lingui/js-lingui/commit/33af3ba3dc22bd4128d98e061cb9d97f75c6503a))
+* remove Node v10, add node v16, fix the fsPromises error ([9739e4f](https://github.com/lingui/js-lingui/commit/9739e4f97d2e2680886f313bb50077f10a570507))
+* Try to add a trailing newline if the file had one ([#1260](https://github.com/lingui/js-lingui/issues/1260)) ([da25b94](https://github.com/lingui/js-lingui/commit/da25b9475d4e622183eb21ad8eae926d09f51c1c))
+* use the 3.9 Python version in the 'deploy-docs' workflow ([83d76f3](https://github.com/lingui/js-lingui/commit/83d76f332c421c316b77ce332b790a767dd2a195))
+
+
+### Features
+
+* Reduce @lingui/macro CPU and memory usage ([#1298](https://github.com/lingui/js-lingui/issues/1298)) ([c993d9e](https://github.com/lingui/js-lingui/commit/c993d9e8dfd7f1aa1a750dc5ec69f94b5bbd5c39))
+* Support GetText template files support during compile ([#1296](https://github.com/lingui/js-lingui/issues/1296)) ([5e43810](https://github.com/lingui/js-lingui/commit/5e43810c98a57ef5ada16f149cf761eab611b715))
+* Switch to cosmiconfig-typescript-loader [#1247](https://github.com/lingui/js-lingui/issues/1247) ([118d183](https://github.com/lingui/js-lingui/commit/118d183805d6cfe160e6160ebd6cf6b4ed338c03))
+
+
+
+
+
+# [3.14.0](https://github.com/lingui/js-lingui/compare/v3.13.3...v3.14.0) (2022-06-22)
+
+
+### Bug Fixes
+
+* Add extra package.json under `/esm` ([#1258](https://github.com/lingui/js-lingui/issues/1258)) ([80cd337](https://github.com/lingui/js-lingui/commit/80cd3378ceb5677bfa50b14f67e4e31703392298))
+* Fix error read properties of undefined ([#1239](https://github.com/lingui/js-lingui/issues/1239)) ([8dd2398](https://github.com/lingui/js-lingui/commit/8dd2398e0d1fdce1663b8aee391f6ab2208be77b))
+* JSX attribute parsing issue when using html entities ([#1234](https://github.com/lingui/js-lingui/issues/1234)) ([98e9332](https://github.com/lingui/js-lingui/commit/98e93322216ab0fc87b8b545fbdd9263b4b6b76b))
+
+
+### Features
+
+* Pass props to I18nProvider.defaultComponent in Trans.render style ([#1242](https://github.com/lingui/js-lingui/issues/1242)) ([fe4cac4](https://github.com/lingui/js-lingui/commit/fe4cac4f89ae195ad8b5216fdaede73900753686))
+
+
+
+
+
+## [3.13.3](https://github.com/lingui/js-lingui/compare/v3.13.2...v3.13.3) (2022-04-24)
+
+
+### Bug Fixes
+
+* @lingui/react compatible with React 18 ([2a235ba](https://github.com/lingui/js-lingui/commit/2a235baa093d668a0a029ec6c683e9dc00f68f42))
+* JSX attribute parsing issue when using double quotes ([#1226](https://github.com/lingui/js-lingui/issues/1226)) ([27a7ded](https://github.com/lingui/js-lingui/commit/27a7ded08be7299417ccebddfd25fa39bda99e77))
+* specify children for react v18 types ([#1230](https://github.com/lingui/js-lingui/issues/1230)) ([ee69736](https://github.com/lingui/js-lingui/commit/ee69736089d4c48117d85582b56a26c09cdf82ea))
+
+
+
+
+
+## [3.13.2](https://github.com/lingui/js-lingui/compare/v3.13.1...v3.13.2) (2022-01-24)
+
+
+### Bug Fixes
+
+* localeData interpolation broken ([457735b](https://github.com/lingui/js-lingui/commit/457735bb61f0a75d0ce176874b1c67a65c4b3084))
+
+
+
+
+
+## [3.13.1](https://github.com/lingui/js-lingui/compare/v3.13.0...v3.13.1) (2022-01-21)
+
+
+### Bug Fixes
+
+* add lingui core to macro peer dependencies ([#1187](https://github.com/lingui/js-lingui/issues/1187)) ([daaa773](https://github.com/lingui/js-lingui/commit/daaa7738c1ca08ee30d5bec4c32214bf665cbfbe))
+* cloud service `import()` on case-sensitive filesystems ([#1174](https://github.com/lingui/js-lingui/issues/1174)) ([5feb120](https://github.com/lingui/js-lingui/commit/5feb120e8c75d7b8c082d5c4b68185ef5dcc3ebc))
+* i18n.activate should load instantly new messages ([#1182](https://github.com/lingui/js-lingui/issues/1182)) ([f8f47a2](https://github.com/lingui/js-lingui/commit/f8f47a2385fe3d8dd3395c493027de2492509325))
+* remove the obsolete `defineMessages` function from the typings. ([#1179](https://github.com/lingui/js-lingui/issues/1179)) ([19b032f](https://github.com/lingui/js-lingui/commit/19b032f2d3634722c6bb9cc69ae3ae6c99773cb7))
+
+
+
+
+
+# [3.13.0](https://github.com/lingui/js-lingui/compare/v3.12.1...v3.13.0) (2021-11-26)
+
+
+### Bug Fixes
+
+* pin cli-table to 0.3.6 ([#1172](https://github.com/lingui/js-lingui/issues/1172)) ([b659b18](https://github.com/lingui/js-lingui/commit/b659b1802054d76862663decd9ef49d983e0304e))
+* **cli:** extract with --overwrite should fallback to key ([#1166](https://github.com/lingui/js-lingui/issues/1166)) ([e5e9d59](https://github.com/lingui/js-lingui/commit/e5e9d598a2f1a27845b414d8be1927b84f3d8e9c))
+* Allow pseudoLocalize to work in @lingui/loader ([#1165](https://github.com/lingui/js-lingui/issues/1165)) ([356c224](https://github.com/lingui/js-lingui/commit/356c224530a0fde730b31602eb6f95c7496f245e))
+* don't push pseudoLocale to translation.io provider ([#1161](https://github.com/lingui/js-lingui/issues/1161)) ([5d2186b](https://github.com/lingui/js-lingui/commit/5d2186bccf7721aaef8573a6a6e9764f00c107e6))
+* stripping origin if line numbers already strippped ([#1143](https://github.com/lingui/js-lingui/issues/1143)) ([82a3265](https://github.com/lingui/js-lingui/commit/82a32655d2cd362ec4d7164822585cbd3ae5dd6e))
+
+
+### Features
+
+* **cli:** make extract cmd asynchronous execution ([#1170](https://github.com/lingui/js-lingui/issues/1170)) ([f99d8b1](https://github.com/lingui/js-lingui/commit/f99d8b17f3f05c3caef9481feb142f0b35916f91))
+* add the ability to extract concatenated comments ([#1152](https://github.com/lingui/js-lingui/issues/1152)) ([0e553cf](https://github.com/lingui/js-lingui/commit/0e553cf14f5f6dce87839abed76fd21f351a2eae))
+* msgctxt support ([#1094](https://github.com/lingui/js-lingui/issues/1094)) ([8ee42cb](https://github.com/lingui/js-lingui/commit/8ee42cbfe26bc6d055748dcf2713ab8ade7ec827))
+
+
+
+
+
+## [3.12.1](https://github.com/lingui/js-lingui/compare/v3.12.0...v3.12.1) (2021-09-28)
+
+
+### Bug Fixes
+
+* **types:** correct types for  macro with custom i18n instance ([#1141](https://github.com/lingui/js-lingui/issues/1141)) ([a9bffdd](https://github.com/lingui/js-lingui/commit/a9bffddf2ae0c9b6ab6a48552d085cfd53140cca))
+
+
+
+
+
+# [3.12.0](https://github.com/lingui/js-lingui/compare/v3.11.1...v3.12.0) (2021-09-28)
+
+
+### Bug Fixes
+
+* **#1137:** configPath is passed through babel-plugin-extract-messages ([#1140](https://github.com/lingui/js-lingui/issues/1140)) ([8921156](https://github.com/lingui/js-lingui/commit/89211567632733cf9955cafc9c92bd87c6154852)), closes [#1137](https://github.com/lingui/js-lingui/issues/1137)
+* Add missing babel properties to config validation ([#1135](https://github.com/lingui/js-lingui/issues/1135)) ([6b2d662](https://github.com/lingui/js-lingui/commit/6b2d6622b715e95b914b14df17501cc486ec45f4))
+
+
+### Features
+
+* **macro:** Add support for passing custom i18n instance ([#1139](https://github.com/lingui/js-lingui/issues/1139)) ([5cad96f](https://github.com/lingui/js-lingui/commit/5cad96fc68a4219178d6caf6ad5c02e2f68f68fa))
+
+
+
+
+
+## [3.11.1](https://github.com/lingui/js-lingui/compare/v3.11.0...v3.11.1) (2021-09-07)
+
+
+### Bug Fixes
+
+* cli and conf needed hotfix for [#1110](https://github.com/lingui/js-lingui/issues/1110) ([1c6378d](https://github.com/lingui/js-lingui/commit/1c6378daa84f77757f99f6e592f6cb0e1fe02ebd))
+
+
+
+
+
+# [3.11.0](https://github.com/lingui/js-lingui/compare/v3.10.4...v3.11.0) (2021-09-07)
+
+
+### Bug Fixes
+
+* 'compile --watch' not watching for correct file based on format ([#1088](https://github.com/lingui/js-lingui/issues/1088)) ([ab68c06](https://github.com/lingui/js-lingui/commit/ab68c06775c37bf5960536f274ed35fb2420f6a8))
+* add extract-template for po-gettext format ([#1089](https://github.com/lingui/js-lingui/issues/1089)) ([ea00f55](https://github.com/lingui/js-lingui/commit/ea00f551cbae2ae7596f7fe3055cb8442863f53a))
+* country-coded language breaks plurals with po-gettext ([#1131](https://github.com/lingui/js-lingui/issues/1131)) ([6b60b8a](https://github.com/lingui/js-lingui/commit/6b60b8af20e7a8e4e74354a870aaa8ef0d25d1e8))
+* extractors CLI validation and accept require and require.resolve ([#1126](https://github.com/lingui/js-lingui/issues/1126)) ([c50a06e](https://github.com/lingui/js-lingui/commit/c50a06eac65d71853ec2c29905a0c4883a5cc70d))
+* fallbackLocales to false causing unexpected behaviour ([#1123](https://github.com/lingui/js-lingui/issues/1123)) ([60e3952](https://github.com/lingui/js-lingui/commit/60e3952f9e99a6d21992821bff573e42f6ecf5fd))
+* fix testing suite [#1098](https://github.com/lingui/js-lingui/issues/1098) ([1144cc7](https://github.com/lingui/js-lingui/commit/1144cc782b25113366245922131e58bc40b2047d))
+* keys with leading number was generating bad object keys ([#1127](https://github.com/lingui/js-lingui/issues/1127)) ([8bb2983](https://github.com/lingui/js-lingui/commit/8bb2983fa93e024ba2cb3d2f63262d2495755755))
+* no files being found when catalogs.include has more than one entry ([#1108](https://github.com/lingui/js-lingui/issues/1108)) ([04efd85](https://github.com/lingui/js-lingui/commit/04efd85ab5bae72607c06672f5c8da809a45dbcb))
+* sideEffects to false for shrinking bundle size ([#1129](https://github.com/lingui/js-lingui/issues/1129)) ([57cd2e5](https://github.com/lingui/js-lingui/commit/57cd2e576945ba30aea30d5cf5bcb27d1f77fe4c))
+* unicode chars were removed from .po files when extracting ([#1125](https://github.com/lingui/js-lingui/issues/1125)) ([d688329](https://github.com/lingui/js-lingui/commit/d688329c0457a080d5cd485a95e94ffa5e00c5ae))
+* wrong detect whether a translation is plural ([#1119](https://github.com/lingui/js-lingui/issues/1119)) ([48b6644](https://github.com/lingui/js-lingui/commit/48b6644f56d66a80d08ca9d95faca8c04d47eba0))
+
+
+### Features
+
+* Add debounce option to compile and extract CLI ([#1101](https://github.com/lingui/js-lingui/issues/1101)) ([a13334c](https://github.com/lingui/js-lingui/commit/a13334ceba850bfd50818d66551877867b86d655))
+* Cloud service providers & Translation.io ([#1107](https://github.com/lingui/js-lingui/issues/1107)) ([cbc87b5](https://github.com/lingui/js-lingui/commit/cbc87b5dab8daf0cd2217b2a2525dfd12dad7272))
+
+
+
+
+
+## [3.10.4](https://github.com/lingui/js-lingui/compare/v3.10.3...v3.10.4) (2021-06-16)
+
+
+### Bug Fixes
+
+* remoteLoader parse complex structures failed [#1087](https://github.com/lingui/js-lingui/issues/1087) ([cee63c4](https://github.com/lingui/js-lingui/commit/cee63c45f1c2bd9efecf6d2a5ff623f2e2af39c2))
+
+
+
+
+
+## [3.10.3](https://github.com/lingui/js-lingui/compare/v3.10.2...v3.10.3) (2021-06-14)
+
+
+### Bug Fixes
+
+* add string return type to i18n._ ([#1081](https://github.com/lingui/js-lingui/issues/1081)) ([68d32d6](https://github.com/lingui/js-lingui/commit/68d32d63899c9a0b2c66891070831c6488a7d013))
+* remoteLoader pure functional on browser env ([#1085](https://github.com/lingui/js-lingui/issues/1085)) ([85856ac](https://github.com/lingui/js-lingui/commit/85856acfa6b1375ef2c96ce0022ee7fe29b4449f))
+
+
+
+
+
+## [3.10.2](https://github.com/lingui/js-lingui/compare/v3.10.1...v3.10.2) (2021-06-08)
+
+
+### Bug Fixes
+
+* remoteLoader should return an object instead of export ([d461695](https://github.com/lingui/js-lingui/commit/d46169598e4b43c5fb5cb686f9b1e8811292e9c6))
+
+
+
+
+
+## [3.10.1](https://github.com/lingui/js-lingui/compare/v3.10.0...v3.10.1) (2021-06-08)
+
+
+### Bug Fixes
+
+* reverts reduce size of ESM packages ([#1066](https://github.com/lingui/js-lingui/issues/1066)) ([3a057e0](https://github.com/lingui/js-lingui/commit/3a057e0c61224b98c93203e0d88136fa48f309ba))
+
+
+
+
+
+# [3.10.0](https://github.com/lingui/js-lingui/compare/v3.9.0...v3.10.0) (2021-06-08)
+
+
+### Bug Fixes
+
+* po-gettext format issues with CLI ([#1073](https://github.com/lingui/js-lingui/issues/1073)) ([a529aca](https://github.com/lingui/js-lingui/commit/a529aca239b232926b786811f9ac03c9b771417b))
+* reduce size of ESM packages ([#1066](https://github.com/lingui/js-lingui/issues/1066)) ([9990eba](https://github.com/lingui/js-lingui/commit/9990ebaa9d30f7e218c106a2abfd7ddbcf0e0170))
+* use correct case for PO file header MIME-Version ([#1074](https://github.com/lingui/js-lingui/issues/1074)) ([f31afc5](https://github.com/lingui/js-lingui/commit/f31afc53837f0e67660d2825125f74fc11db8e0b))
+
+
+### Features
+
+* load remote catalogs with remoteLoader() ([#1080](https://github.com/lingui/js-lingui/issues/1080)) ([e73a4b3](https://github.com/lingui/js-lingui/commit/e73a4b34cf8d83a45044c220148761d79b4fd8a9))
+
+
+
+
+
+# [3.9.0](https://github.com/lingui/js-lingui/compare/v3.8.10...v3.9.0) (2021-05-18)
+
+
+### Bug Fixes
+
+* ESM dev entrypoint was causing unexpected behaviors ([#1059](https://github.com/lingui/js-lingui/issues/1059)) ([2b8d70b](https://github.com/lingui/js-lingui/commit/2b8d70b35ed103d94a2f88ea7c6813a29a1d5635))
+* lineNumbers false was removing the entire origin ([#1060](https://github.com/lingui/js-lingui/issues/1060)) ([2d25f2c](https://github.com/lingui/js-lingui/commit/2d25f2c5d8f7c624250a1218f83cbe43433c264b))
+
+
+### Features
+
+* configurable and extendable extractors with Lingui config ([#1065](https://github.com/lingui/js-lingui/issues/1065)) ([263ee59](https://github.com/lingui/js-lingui/commit/263ee59163c94220f5ba3999aa60ca40dc352e0c))
+
+
+
+
+
+## [3.8.10](https://github.com/lingui/js-lingui/compare/v3.8.9...v3.8.10) (2021-04-19)
+
+
+### Bug Fixes
+
+* loader works smoothly on webpack 5 & 4 ([#1046](https://github.com/lingui/js-lingui/issues/1046)) ([78ad09f](https://github.com/lingui/js-lingui/commit/78ad09fc88e8ec07daefb455457e778471977f2f))
+
+
+
+
+
+## [3.8.9](https://github.com/lingui/js-lingui/compare/v3.8.8...v3.8.9) (2021-04-09)
+
+
+### Bug Fixes
+
+* event emitter refactor (reverted)  ([#1038](https://github.com/lingui/js-lingui/issues/1038)) ([f299493](https://github.com/lingui/js-lingui/commit/f299493999299fe9a7d0e01b9045e7f0a9813c6a))
+
+
+
+
+
+## [3.8.8](https://github.com/lingui/js-lingui/compare/v3.8.7...v3.8.8) (2021-04-09)
+
+
+### Bug Fixes
+
+* unicode char was not extracting correctly ([3653f6f](https://github.com/lingui/js-lingui/commit/3653f6f62043a095a2babaf16a54280db9996228))
+
+
+
+
+
+## [3.8.7](https://github.com/lingui/js-lingui/compare/v3.8.6...v3.8.7) (2021-04-09)
+
+
+### Bug Fixes
+
+* unicode chars in native environments + event emitter refactor ([#1036](https://github.com/lingui/js-lingui/issues/1036)) ([39fa90d](https://github.com/lingui/js-lingui/commit/39fa90d95c08f105f3f7feb17b65d9b8f916b73a))
+
+
+
+
+
+## [3.8.6](https://github.com/lingui/js-lingui/compare/v3.8.5...v3.8.6) (2021-04-08)
+
+
+### Bug Fixes
+
+* unicode chars were extracting with double slashes ([#1035](https://github.com/lingui/js-lingui/issues/1035)) ([aed49b1](https://github.com/lingui/js-lingui/commit/aed49b15f3d13635a4e4a8d19fc4cb9f6e4a6f70))
+
+
+
+
+
+## [3.8.5](https://github.com/lingui/js-lingui/compare/v3.8.4...v3.8.5) (2021-04-08)
+
+
+### Bug Fixes
+
+* improve compile log error if bad syntax on the string ([9b2705f](https://github.com/lingui/js-lingui/commit/9b2705feada95f5272346bacee54a26b5518af5e))
+
+
+
+
+
+## [3.8.4](https://github.com/lingui/js-lingui/compare/v3.8.3...v3.8.4) (2021-04-08)
+
+
+### Bug Fixes
+
+* respect unicode chars in t macro ([#1032](https://github.com/lingui/js-lingui/issues/1032)) ([7597621](https://github.com/lingui/js-lingui/commit/7597621827f66e81a4e1fdf6ec64c986c9c88c7d))
+* typescript loader config ([#1029](https://github.com/lingui/js-lingui/issues/1029)) ([93afb72](https://github.com/lingui/js-lingui/commit/93afb72c1d6235df1516655d5ab4eea0eeb606ee))
+* undefined interpolation on t macro ([#1030](https://github.com/lingui/js-lingui/issues/1030)) ([194f9b3](https://github.com/lingui/js-lingui/commit/194f9b318434bcaf4b68af549a6ed246fed2be02))
+
+
+
+
+
+## [3.8.3](https://github.com/lingui/js-lingui/compare/v3.8.2...v3.8.3) (2021-04-05)
+
+
+### Bug Fixes
+
+* extract works with template string id's ([#1027](https://github.com/lingui/js-lingui/issues/1027)) ([a17d629](https://github.com/lingui/js-lingui/commit/a17d629d82395cd86cc080648ef2ebe2a9653225))
+
+
+
+
+
+## [3.8.2](https://github.com/lingui/js-lingui/compare/v3.8.1...v3.8.2) (2021-03-31)
+
+**Note:** Version bump only for package js-lingui-workspaces
+
+
+
+
+
+## [3.8.1](https://github.com/lingui/js-lingui/compare/v3.8.0...v3.8.1) (2021-03-23)
+
+
+### Bug Fixes
+
+* fallback locales default not overwritten ([78e4576](https://github.com/lingui/js-lingui/commit/78e45766fda0c147b77f96d71e9d775743ee8d18))
+
+
+
+
+
+# [3.8.0](https://github.com/lingui/js-lingui/compare/v3.7.2...v3.8.0) (2021-03-23)
+
+
+### Bug Fixes
+
+* selectOrdinal pseudolocalize insensitive ([16acafe](https://github.com/lingui/js-lingui/commit/16acafe42a2ae1c33200ab9b89bc7a17db69897d))
+
+
+### Features
+
+* allow to disable lineNumbers ([#1007](https://github.com/lingui/js-lingui/issues/1007)) ([fe67e0f](https://github.com/lingui/js-lingui/commit/fe67e0f7986188bff2c102703c4df3507506e0f2))
+
+
+
+
+
+## [3.7.2](https://github.com/lingui/js-lingui/compare/v3.7.1...v3.7.2) (2021-03-14)
+
+
+### Bug Fixes
+
+* lingui extract ignores custom directories as args [#998](https://github.com/lingui/js-lingui/issues/998) ([f426881](https://github.com/lingui/js-lingui/commit/f426881d2b6fb51de06ed43159f56b67a36e2ece))
+* webpack 5 issue with jest @lingui/loader [#999](https://github.com/lingui/js-lingui/issues/999) ([9e68a8d](https://github.com/lingui/js-lingui/commit/9e68a8d1e6f3565f724dd027b165e85b1d891c92))
+
+
+
+
+
+## [3.7.1](https://github.com/lingui/js-lingui/compare/v3.7.0...v3.7.1) (2021-03-07)
+
+
+### Bug Fixes
+
+* exports attribute on package.json, expo compat ([#997](https://github.com/lingui/js-lingui/issues/997)) ([79aa509](https://github.com/lingui/js-lingui/commit/79aa50998185847064d80f2a38be0ebcb64424f9))
+
+
+
+
+
+# [3.7.0](https://github.com/lingui/js-lingui/compare/v3.6.0...v3.7.0) (2021-03-04)
+
+
+### Bug Fixes
+
+* @lingui/cli type error when catalog is missing ([#988](https://github.com/lingui/js-lingui/issues/988)) ([8c44af2](https://github.com/lingui/js-lingui/commit/8c44af2442f979ae60de8059e68436508cdc8f74))
+* macro components should omit key prop [#994](https://github.com/lingui/js-lingui/issues/994) ([f2a4da0](https://github.com/lingui/js-lingui/commit/f2a4da08542567b77fc2ae8ebf9385f6d8055f6f))
+* Report correct number of missing messages in strict mode ([#992](https://github.com/lingui/js-lingui/issues/992)) ([128f3e2](https://github.com/lingui/js-lingui/commit/128f3e237daef838e18e73818fc681609e4bc131))
+* use pkgUp.sync to localize package.json ([#985](https://github.com/lingui/js-lingui/issues/985)) ([18d985d](https://github.com/lingui/js-lingui/commit/18d985dd414276d07a1f7ffc7e21ffa5e0dadc36))
+
+
+### Features
+
+* raise event on missing translation ([#993](https://github.com/lingui/js-lingui/issues/993)) ([ecf83c3](https://github.com/lingui/js-lingui/commit/ecf83c37e177cb10f157fb8913d73e18662e3ca4))
+
+
+
+
+
+# [3.6.0](https://github.com/lingui/js-lingui/compare/v3.5.1...v3.6.0) (2021-02-23)
+
+
+### Features
+
+* --watch mode for extract and compile ([#974](https://github.com/lingui/js-lingui/issues/974)) ([a4f90ee](https://github.com/lingui/js-lingui/commit/a4f90ee1cedf3726908104f535b9a8985a444363))
+* ship universal modules with ESM ([#979](https://github.com/lingui/js-lingui/issues/979)) ([6cd5fe0](https://github.com/lingui/js-lingui/commit/6cd5fe0a71dd5cf7e0832bd3e9902a2f6ba789f6))
+
+
+
+
+
+## [3.5.1](https://github.com/lingui/js-lingui/compare/v3.5.0...v3.5.1) (2021-02-09)
+
+
+### Bug Fixes
+
+* @lingui/macro types for global environments ([#973](https://github.com/lingui/js-lingui/issues/973)) ([92a5ce7](https://github.com/lingui/js-lingui/commit/92a5ce786d979d4bd0f65a50962fdb3bd27d91d7))
+* runtimeConfigModule config validation ([#972](https://github.com/lingui/js-lingui/issues/972)) ([5656c95](https://github.com/lingui/js-lingui/commit/5656c95b8b2ecfdfe903a941918c60abe16e1691))
+* **@lingui/loader:** accept webpack 5.x as a peer dependency ([#971](https://github.com/lingui/js-lingui/issues/971)) ([b9683cc](https://github.com/lingui/js-lingui/commit/b9683cc3f1274efab805d6143398d78fbb3310c5))
+
+
+
+
+
+# [3.5.0](https://github.com/lingui/js-lingui/compare/v3.4.0...v3.5.0) (2021-02-02)
+
+
+### Bug Fixes
+
+* @lingui/conf lodash.get dependency ([#950](https://github.com/lingui/js-lingui/issues/950)) ([f7b59ab](https://github.com/lingui/js-lingui/commit/f7b59abbcfc8bd797478a549641ca9e3b97a9701))
+* Select /> pseudolocalization ([#961](https://github.com/lingui/js-lingui/issues/961)) ([f1e1a25](https://github.com/lingui/js-lingui/commit/f1e1a25acd654c9877147ce3f40bc827bc54987a))
+* I18nProvider defaultComponent typing ([#953](https://github.com/lingui/js-lingui/issues/953)) ([6b08dd3](https://github.com/lingui/js-lingui/commit/6b08dd309d1ac8e0a8dc081e097e69678e822eda))
+* message when translations are missing ([#964](https://github.com/lingui/js-lingui/issues/964)) ([14f24f2](https://github.com/lingui/js-lingui/commit/14f24f2725771dcea0793de146abc9b86ea88789))
+* NODE_ENV=production crashes lingui extract [#952](https://github.com/lingui/js-lingui/issues/952) ([f368b35](https://github.com/lingui/js-lingui/commit/f368b353e975dab4024b755eb9d70f48b535a693))
+* obsolete flag disable when using extract [files] ([#967](https://github.com/lingui/js-lingui/issues/967)) ([0ea63e9](https://github.com/lingui/js-lingui/commit/0ea63e9a0b5cd2463fca18621e6dba16642f4d00))
+* React macros fixes ([#958](https://github.com/lingui/js-lingui/issues/958)) ([353c537](https://github.com/lingui/js-lingui/commit/353c5379a22473293aafcb4651db387e72c82a7a))
+* wrong typing of Trans macro component prop ([#960](https://github.com/lingui/js-lingui/issues/960)) ([57482c0](https://github.com/lingui/js-lingui/commit/57482c0f1ecab7c266628e7c9be2bd10538c7a57))
+* **docs:** documentation-typos ([#955](https://github.com/lingui/js-lingui/issues/955)) ([f73cb8c](https://github.com/lingui/js-lingui/commit/f73cb8c09d9919489f5fbb9a539da30faae53004))
+
+
+### Features
+
+* Introduced @lingui/snowpack-plugin ([#947](https://github.com/lingui/js-lingui/issues/947)) ([96bd31b](https://github.com/lingui/js-lingui/commit/96bd31b54d5ebfa2e28c96e14ee92d43b4199ae5))
+
+
+
+
+
+# [3.4.0](https://github.com/lingui/js-lingui/compare/v3.3.0...v3.4.0) (2021-01-13)
+
+
+### Bug Fixes
+
+* added return type to i18n._ ([#922](https://github.com/lingui/js-lingui/issues/922)) ([249c486](https://github.com/lingui/js-lingui/commit/249c486d258a4fb44bae1e3da1765e00003429a7))
+* compilerBabelOptions warning with jest-validate ([#938](https://github.com/lingui/js-lingui/issues/938)) ([087ec1f](https://github.com/lingui/js-lingui/commit/087ec1fe45076bcfc8ea3a6f7657f39bbe1c1d58))
+* Last scaped brackets were not unscaped ([db2f768](https://github.com/lingui/js-lingui/commit/db2f7684f4a8b6babe1c87fef9fb2775ebf3a97c))
+* Use LINGUI_CONFIG env as fallback for extract ([#932](https://github.com/lingui/js-lingui/issues/932)) ([ce71a8b](https://github.com/lingui/js-lingui/commit/ce71a8bc6f7b7bb9d1f3c46d473dc5e700a6b6b5))
+* **detect-locale:** ESM import not published ([#926](https://github.com/lingui/js-lingui/issues/926)) ([4ad90d4](https://github.com/lingui/js-lingui/commit/4ad90d4c60b752e9f0d82f3dd71936711c51573d))
+* prevent adding undefined msgid to messages ([#915](https://github.com/lingui/js-lingui/issues/915)) ([3afacec](https://github.com/lingui/js-lingui/commit/3afaceccb669b59ee2f5b42ee2e138646ccdb79d))
+
+
+### Features
+
+* Lingui compiles to typescript files ([#942](https://github.com/lingui/js-lingui/issues/942)) ([10bce7d](https://github.com/lingui/js-lingui/commit/10bce7dc890f208dc71bcf81dc34e57d389544fe))
+* Support lingui config in multiple formats ([#941](https://github.com/lingui/js-lingui/issues/941)) ([8631111](https://github.com/lingui/js-lingui/commit/8631111a83c5f2fb87e7b6d794a279dbf7e8579d))
+
+
+
+
+
+# [3.3.0](https://github.com/lingui/js-lingui/compare/v3.2.3...v3.3.0) (2020-12-08)
+
+
+### Bug Fixes
+
+* accept pseudolocalization in SelectOrdinal ([#903](https://github.com/lingui/js-lingui/issues/903)) ([d4c24bf](https://github.com/lingui/js-lingui/commit/d4c24bf6bbb1a6eeb651b1a70490b10f502a28c6))
+* formatters exceptions throw error ([#889](https://github.com/lingui/js-lingui/issues/889)) ([d6b774c](https://github.com/lingui/js-lingui/commit/d6b774cf53dd4bf691a228d3f05edaea2442b121))
+* macro underscore type ([#884](https://github.com/lingui/js-lingui/issues/884)) ([5cade19](https://github.com/lingui/js-lingui/commit/5cade1924dd038ba73ff85cdcf7ce80d31ddbd0f))
+* plural pseudolocalization with offset ([#887](https://github.com/lingui/js-lingui/issues/887)) ([3d54b4d](https://github.com/lingui/js-lingui/commit/3d54b4d9b10b731733a385306263de2da08100ec))
+* scaped literals double backslash formatting ([#898](https://github.com/lingui/js-lingui/issues/898)) ([fc8c628](https://github.com/lingui/js-lingui/commit/fc8c628e05522167c5ad76e2cb8c6161be95b8b4))
+* select prop types ([#890](https://github.com/lingui/js-lingui/issues/890)) ([672fb1f](https://github.com/lingui/js-lingui/commit/672fb1f5731fe0abeb2fa7ea0de78827e547873c))
+
+
+### Features
+
+* add support for runtimeConfigModule w/ Trans ([#895](https://github.com/lingui/js-lingui/issues/895)) ([23b06b5](https://github.com/lingui/js-lingui/commit/23b06b5dfbf0db306cdfab83801898caceb5a8b0))
+* config accepts compilerBabelOptions ([#906](https://github.com/lingui/js-lingui/issues/906)) ([38d01ef](https://github.com/lingui/js-lingui/commit/38d01ef13a7867460b68ab709f94a17176a21f25))
+* extract messages from specific files ([#881](https://github.com/lingui/js-lingui/issues/881)) ([82dea5f](https://github.com/lingui/js-lingui/commit/82dea5f35b55cbb039a48e49fc94dbfbbaca7df9))
+* Implement gettext plurals for PO files ([#677](https://github.com/lingui/js-lingui/issues/677)) ([415b90e](https://github.com/lingui/js-lingui/commit/415b90e0abfb24bb7170a5ba7630a4ead94898dd))
+
+
+
+
+
 ## [3.2.3](https://github.com/lingui/js-lingui/compare/v3.2.2...v3.2.3) (2020-11-22)
 
 

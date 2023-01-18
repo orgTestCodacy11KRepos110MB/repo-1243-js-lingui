@@ -1,8 +1,8 @@
 {
   "name": "@lingui/babel-plugin-extract-messages",
-  "version": "3.2.3",
+  "version": "3.16.0",
   "description": "Babel plugin for collecting messages from source code for internationalization",
-  "main": "index.js",
+  "main": "./build/index.js",
   "author": {
     "name": "Tomáš Ehrlich",
     "email": "tomas.ehrlich@gmail.com"
@@ -17,6 +17,11 @@
     "i9n",
     "translation"
   ],
+  "files": [
+    "LICENSE",
+    "README.md",
+    "build/"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/lingui/js-lingui.git"
@@ -25,12 +30,12 @@
     "url": "https://github.com/lingui/js-lingui/issues"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=14.0.0"
   },
   "dependencies": {
     "@babel/generator": "^7.11.6",
     "@babel/runtime": "^7.11.2",
-    "@lingui/conf": "^3.2.3",
+    "@lingui/conf": "3.16.0",
     "mkdirp": "^1.0.4"
   }
 }
