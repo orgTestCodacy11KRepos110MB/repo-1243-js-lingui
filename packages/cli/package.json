@@ -18,16 +18,22 @@
     "name": "Tomáš Ehrlich",
     "email": "tomas.ehrlich@gmail.com"
   },
-  "main": "./build/index.js",
+  "main": "./build/lingui.js",
   "bin": {
     "lingui": "./build/lingui.js"
   },
   "exports": {
     ".": {
-      "require": "./build/index.js"
+      "require": "./build/lingui.js"
     },
     "./api": {
       "require": "./build/api/index.js"
+    },
+    "./api/extractors/babel": {
+      "require": "./build/api/extractors/babel.js"
+    },
+    "./api/extractors/typescript": {
+      "require": "./build/api/extractors/typescript.js"
     }
   },
   "engines": {
